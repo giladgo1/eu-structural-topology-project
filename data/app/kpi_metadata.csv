@@ -1,0 +1,20 @@
+kpi,dimension,unit,higher_is_generally,interpretation_risk,short_description
+gdp_growth,economy,% annual change,positive,medium,Annual GDP growth rate
+inflation,economy,% annual change,contextual,medium,Consumer price inflation
+unemployment,economy,% of labor force,negative,medium,Unemployment rate
+gini,society,Gini coefficient,negative,high,Income inequality indicator
+education,society,% of population,positive,medium,Educational attainment level
+rnd,innovation,% of GDP,positive,medium,Research and development intensity
+ict_specialists,innovation,% of employment,positive,medium,ICT specialist workforce share
+renewables,sustainability,% of energy use,positive,medium,Renewable energy share
+emissions,sustainability,index / emissions proxy,negative,high,Greenhouse gas emissions
+debt,fiscal_resilience,% of GDP,contextual,high,Government debt level
+defense_spending,public_investment,% of GDP,contextual,medium,Defense expenditure share
+economic_affairs_spending,public_investment,% of GDP,contextual,medium,Economic affairs expenditure
+fuel_energy_spending,public_investment,% of GDP,contextual,high,Fuel and energy expenditure
+communication_spending,public_investment,% of GDP,contextual,high,Communication expenditure
+environment_spending,public_investment,% of GDP,positive,medium,Environmental protection expenditure
+health_spending,public_investment,% of GDP,positive,medium,Health expenditure
+education_spending,public_investment,% of GDP,positive,medium,Education expenditure
+social_protection_spending,public_investment,% of GDP,positive,medium,Social protection expenditure
+total_gov_expenditure,public_investment,% of GDP,contextual,medium,Total government expenditure

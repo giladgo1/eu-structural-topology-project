@@ -1,0 +1,103 @@
+# ============================================================
+# PYTHON
+# ============================================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+.ipynb_checkpoints/
+
+.venv/
+venv/
+env/
+
+.env
+
+# ============================================================
+# OS / IDE
+# ============================================================
+
+.DS_Store
+Thumbs.db
+
+.vscode/
+.idea/
+
+# ============================================================
+# JUPYTER
+# ============================================================
+
+.jupyter/
+
+# ============================================================
+# DATA
+# ============================================================
+
+# Raw datasets (usually too large / reproducible)
+data/raw/**/*
+
+# Temporary/intermediate processing
+data/interim/**/*
+
+# Large processed datasets
+data/processed/**/*
+
+# Keep folder structure
+!data/raw/.gitkeep
+!data/raw/eurostat/.gitkeep
+
+!data/interim/.gitkeep
+!data/interim/cleaned_kpis/.gitkeep
+
+!data/processed/.gitkeep
+
+# ------------------------------------------------------------
+# ALLOW SMALL APP EXPORTS
+# IMPORTANT FOR STREAMLIT / DASHBOARDS
+# ------------------------------------------------------------
+
+!data/app/
+!data/app/*.csv
+
+# ============================================================
+# EXPORTS / FIGURES
+# ============================================================
+
+# Optional:
+# ignore temporary exports but keep curated figures
+
+exports/temp/**/*
+
+# ============================================================
+# TABLEAU
+# ============================================================
+
+*.hyper
+~$*
+
+# Optional:
+# Tableau packaged workbooks can become huge
+# Uncomment if needed
+
+# *.twbx
+
+# ============================================================
+# STREAMLIT
+# ============================================================
+
+.streamlit/secrets.toml
+
+# ============================================================
+# LOGS / TEMP
+# ============================================================
+
+*.log
+temp/
+tmp/
+
+# ============================================================
+# MAC / WINDOWS ARTIFACTS
+# ============================================================
+
+._*
