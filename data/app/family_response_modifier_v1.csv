@@ -1,0 +1,16 @@
+layer,source,target,structural_family,overall_pearson,family_pearson,direction_agreement,strength_delta,family_modifier
+Investment,Environment,Sustainability,Adaptive / Peripheral Systems,0.118,0.317,1,0.199,10.0
+Investment,Environment,Sustainability,Industrial / Transition Systems,0.118,0.729,1,0.611,31.0
+Investment,Environment,Sustainability,Innovation-Core Systems,0.118,-0.246,-1,0.128,-6.0
+Investment,Social Protection,Adaptive Transformation,Adaptive / Peripheral Systems,0.345,0.715,1,0.37,18.0
+Investment,Social Protection,Adaptive Transformation,Industrial / Transition Systems,0.345,0.827,1,0.482,24.0
+Investment,Social Protection,Adaptive Transformation,Innovation-Core Systems,0.345,-0.547,-1,0.20200000000000007,-10.0
+Dimension,Human Capital,Innovation,Adaptive / Peripheral Systems,0.406,0.075,1,-0.331,-17.0
+Dimension,Human Capital,Innovation,Industrial / Transition Systems,0.406,0.102,1,-0.30400000000000005,-15.0
+Dimension,Human Capital,Innovation,Innovation-Core Systems,0.406,0.937,1,0.531,27.0
+Dimension,Fiscal Flexibility,Adaptive Transformation,Adaptive / Peripheral Systems,-0.37,-0.718,1,0.348,17.0
+Dimension,Fiscal Flexibility,Adaptive Transformation,Industrial / Transition Systems,-0.37,-0.363,1,-0.007000000000000006,-0.0
+Dimension,Fiscal Flexibility,Adaptive Transformation,Innovation-Core Systems,-0.37,0.814,-1,0.44399999999999995,-22.0
+Dimension,Sustainability,Fiscal Flexibility,Adaptive / Peripheral Systems,-0.308,-0.22,1,-0.088,-4.0
+Dimension,Sustainability,Fiscal Flexibility,Industrial / Transition Systems,-0.308,-0.768,1,0.46,23.0
+Dimension,Sustainability,Fiscal Flexibility,Innovation-Core Systems,-0.308,0.459,-1,0.15100000000000002,-8.0

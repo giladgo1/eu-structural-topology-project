@@ -1,0 +1,10 @@
+relationship,pearson,evidence_level,status,notes
+Innovation ↔ Social Stability,0.806,A,Validated,Strong ecosystem relationship
+Social Stability ↔ Security,-0.334,B,Validated,Moderate negative relationship across families
+Human Capital ↔ Innovation,0.406,C,Family Dependent,Primarily Innovation-Core effect
+Fiscal Flexibility ↔ Adaptive Transformation,-0.37,C,Family Dependent,Direction reversal by family
+Sustainability ↔ Fiscal Flexibility,-0.308,C,Family Dependent,"Negative in Industrial, positive in Innovation-Core"
+Innovation ↔ Security,-0.341,D,Geometry Only,Weak tradeoff signal
+Human Capital ↔ Social Stability,0.303,D,Rejected,No consistent family pattern
+Social Stability ↔ Fiscal Flexibility,-0.291,D,Rejected,Weak Innovation-Core effect only
+Sustainability ↔ Security,0.289,D,Rejected,No stable relationship

@@ -1,0 +1,38 @@
+layer,source,target,evidence_level,base_weight,structural_family,family_modifier,effective_weight,manual_direction_override
+Investment,Education,Human Capital,A,85,,0.0,85.0,False
+Investment,Defense,Security,A,85,,0.0,85.0,False
+Investment,Social Protection,Fiscal Flexibility,A,85,,0.0,85.0,False
+Investment,Social Protection,Social Stability,B,65,,0.0,65.0,False
+Investment,Education,Innovation,B,65,,0.0,65.0,False
+Investment,Social Protection,Innovation,B,65,,0.0,65.0,False
+Investment,Environment,Sustainability,C,35,Adaptive / Peripheral Systems,10.0,45.0,False
+Investment,Environment,Sustainability,C,35,Industrial / Transition Systems,31.0,66.0,False
+Investment,Environment,Sustainability,C,35,Innovation-Core Systems,-6.0,29.0,False
+Investment,Social Protection,Adaptive Transformation,C,35,Adaptive / Peripheral Systems,18.0,53.0,False
+Investment,Social Protection,Adaptive Transformation,C,35,Industrial / Transition Systems,24.0,59.0,False
+Investment,Social Protection,Adaptive Transformation,C,35,Innovation-Core Systems,-10.0,-25.0,True
+Investment,Education,Social Stability,D,10,,0.0,10.0,False
+Investment,Education,Sustainability,D,10,,0.0,10.0,False
+Investment,Defense,Adaptive Transformation,D,10,,0.0,10.0,False
+Investment,Economic Affairs,Fiscal Flexibility,D,10,,0.0,10.0,False
+Investment,Education,Fiscal Flexibility,D,10,,0.0,10.0,False
+Investment,Economic Affairs,Innovation,D,10,,0.0,10.0,False
+Investment,Economic Affairs,Sustainability,D,10,,0.0,10.0,False
+Investment,Economic Affairs,Adaptive Transformation,D,10,,0.0,10.0,False
+Investment,Defense,Fiscal Flexibility,D,10,,0.0,10.0,False
+Investment,Environment,Adaptive Transformation,D,10,,0.0,10.0,False
+Dimension,Innovation,Social Stability,A,85,,0.0,85.0,False
+Dimension,Social Stability,Security,B,65,,0.0,65.0,False
+Dimension,Human Capital,Innovation,C,35,Adaptive / Peripheral Systems,-17.0,18.0,False
+Dimension,Human Capital,Innovation,C,35,Industrial / Transition Systems,-15.0,20.0,False
+Dimension,Human Capital,Innovation,C,35,Innovation-Core Systems,27.0,62.0,False
+Dimension,Fiscal Flexibility,Adaptive Transformation,C,35,Adaptive / Peripheral Systems,17.0,-52.0,True
+Dimension,Fiscal Flexibility,Adaptive Transformation,C,35,Industrial / Transition Systems,-0.0,-35.0,True
+Dimension,Fiscal Flexibility,Adaptive Transformation,C,35,Innovation-Core Systems,-22.0,42.0,True
+Dimension,Sustainability,Fiscal Flexibility,C,35,Adaptive / Peripheral Systems,-4.0,-31.0,True
+Dimension,Sustainability,Fiscal Flexibility,C,35,Industrial / Transition Systems,23.0,-58.0,True
+Dimension,Sustainability,Fiscal Flexibility,C,35,Innovation-Core Systems,-8.0,27.0,True
+Dimension,Innovation,Security,D,10,,0.0,10.0,False
+Dimension,Human Capital,Social Stability,D,10,,0.0,10.0,False
+Dimension,Social Stability,Fiscal Flexibility,D,10,,0.0,10.0,False
+Dimension,Sustainability,Security,D,10,,0.0,10.0,False
