@@ -1,0 +1,11 @@
+shock_type,dimension,severity,base_impact,direction
+Recession,Social Stability,High,-15,-1
+Recession,Fiscal Flexibility,High,-15,-1
+Recession,Innovation,Medium,-10,-1
+Recession,Adaptive Transformation,Medium,-10,-1
+Energy,Security,High,15,1
+Energy,Fiscal Flexibility,High,-15,-1
+Energy,Sustainability,Medium,10,1
+Energy,Social Stability,Medium,-10,-1
+Energy,Adaptive Transformation,Medium,10,1
+Energy,Innovation,Low,-5,-1

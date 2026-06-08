@@ -1,0 +1,28 @@
+country_name,cluster_k4,structural_family,structural_subfamily,family_anchor_archetype,family_color
+Bulgaria,1,Adaptive / Peripheral Systems,Peripheral Security Transition,Spain / Greece,orange
+Estonia,1,Adaptive / Peripheral Systems,Adaptive-Security Innovation Bridge,Spain / Greece,orange
+Latvia,1,Adaptive / Peripheral Systems,Baltic Security Transition,Spain / Greece,orange
+Lithuania,1,Adaptive / Peripheral Systems,Baltic Security Transition,Spain / Greece,orange
+Romania,1,Adaptive / Peripheral Systems,Peripheral Convergence Pathway,Spain / Greece,orange
+Croatia,1,Adaptive / Peripheral Systems,Peripheral Adaptive Transition,Spain / Greece,orange
+Cyprus,1,Adaptive / Peripheral Systems,Peripheral Adaptive Transition,Spain / Greece,orange
+Greece,1,Adaptive / Peripheral Systems,Adaptive-Security Outlier,Spain / Greece,orange
+Malta,1,Adaptive / Peripheral Systems,Peripheral Adaptive Transition,Spain / Greece,orange
+Portugal,1,Adaptive / Peripheral Systems,Peripheral Adaptive Transition,Spain / Greece,orange
+Spain,1,Adaptive / Peripheral Systems,Adaptive Transition System,Spain / Greece,orange
+Ireland,2,Other / Transitional,Small-State / Financial Outlier,Mixed,gray
+Luxembourg,2,Other / Transitional,Small-State / Financial Outlier,Mixed,gray
+Austria,3,Innovation-Core Systems,Innovation-Core Central Variant,Sweden,blue
+Belgium,3,Innovation-Core Systems,Innovation-Core Central Variant,Sweden,blue
+Denmark,3,Innovation-Core Systems,Nordic Sustainability Frontier,Sweden,blue
+Finland,3,Innovation-Core Systems,Nordic Innovation Welfare,Sweden,blue
+Netherlands,3,Innovation-Core Systems,Innovation-Efficiency Transition,Sweden,blue
+Sweden,3,Innovation-Core Systems,Nordic Sustainability Frontier,Sweden,blue
+Czechia,4,Industrial / Transition Systems,Manufacturing Transition Core,Germany,purple
+France,4,Industrial / Transition Systems,Mixed Industrial-Social Model,Germany,purple
+Germany,4,Industrial / Transition Systems,Industrial Innovation Core,Germany,purple
+Hungary,4,Industrial / Transition Systems,Industrial Adaptive Variant,Germany,purple
+Italy,4,Industrial / Transition Systems,Fiscal-Stabilization Variant,Germany,purple
+Poland,4,Industrial / Transition Systems,Industrial-Security Bridge,Germany,purple
+Slovakia,4,Industrial / Transition Systems,Manufacturing Transition Core,Germany,purple
+Slovenia,4,Industrial / Transition Systems,Industrial Adaptive Variant,Germany,purple

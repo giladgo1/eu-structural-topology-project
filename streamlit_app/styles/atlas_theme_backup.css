@@ -1,0 +1,984 @@
+/* ============================================================
+   ATLAS SEMANTIC COLORS
+   SINGLE SOURCE OF TRUTH
+   ============================================================ */
+
+:root {
+
+    --atlas-info: #38BDF8;
+
+    --atlas-strength: #4ADE80;
+
+    --atlas-constraint: #F472B6;
+
+    --atlas-warning: #F59E0B;
+
+    --atlas-danger: #EF4444;
+
+    --atlas-text: #F8FAFC;
+
+    --atlas-muted: #CBD5E1;
+
+}
+
+
+
+/* =============================================================================
+   ATLAS THEME — EUROPEAN STRATEGY ATLAS
+   ============================================================================= */
+
+/* Global app background */
+.stApp {
+    background-color: #0B1220;
+    color: #E5E7EB;
+}
+
+/* Main content width and spacing */
+.block-container {
+    max-width: 100% !important;
+    width: 100% !important;
+
+    padding-top: 2.5rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 4rem;
+}
+
+/* Headings */
+h1, h2, h3 {
+    color: #F8FAFC;
+    letter-spacing: -0.02em;
+}
+
+/* Muted helper text */
+.atlas-muted {
+    color: #94A3B8;
+    font-size: 0.95rem;
+}
+
+/* General card */
+.atlas-card {
+    background: rgba(15, 23, 42, 0.92);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 18px;
+    padding: 1.1rem 1.2rem;
+    margin-bottom: 1rem;
+}
+
+/* Card title */
+.atlas-card-title {
+    color: #F8FAFC;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.35rem;
+}
+
+/* Card value */
+.atlas-card-value {
+    color: #E5E7EB;
+    font-size: 1.45rem;
+    font-weight: 700;
+}
+
+/* Accent text */
+.atlas-accent {
+    color: var(--atlas-info);
+    font-weight: 700;
+}
+
+.atlas-positive {
+    color: var(--atlas-strength);
+    font-weight: 700;
+}
+
+.atlas-negative {
+    color: var(--atlas-constraint);
+    font-weight: 700;
+}
+
+.atlas-neutral {
+    color: var(--atlas-muted);
+    font-weight: 700;
+}
+
+
+
+
+/* =============================================================================
+   PAGE 1 — TOP CONTEXT + FULL WIDTH KPI RIBBON
+============================================================================= */
+
+.p1-top-shell {
+    display: grid;
+    grid-template-columns: 1.25fr 1.15fr 1.45fr 1fr 0.9fr;
+    gap: 14px;
+    align-items: stretch;
+    width: 100%;
+    margin-bottom: 14px;
+}
+
+.p1-brand,
+.p1-context-card,
+.p1-kpi-card {
+    background: rgba(8, 18, 34, 0.88);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 0 24px rgba(56, 189, 248, 0.06);
+}
+
+.p1-brand {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    min-height: 82px;
+}
+
+.p1-logo {
+    font-size: 42px;
+    color: #38BDF8;
+}
+
+.p1-brand-title {
+    font-size: 1.22rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #F8FAFC;
+    line-height: 1.05;
+}
+
+.p1-brand-subtitle,
+.p1-context-label,
+.p1-kpi-sub {
+    color: #94A3B8;
+    font-size: 0.78rem;
+}
+
+.p1-context-label,
+.p1-kpi-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: #CBD5E1;
+    margin-bottom: 8px;
+}
+
+.p1-context-value {
+    color: #F8FAFC;
+    font-weight: 600;
+}
+
+.p1-toggle-row {
+    display: flex;
+    gap: 8px;
+}
+
+.p1-toggle,
+.p1-toggle-active {
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #CBD5E1;
+    font-size: 0.8rem;
+}
+
+.p1-toggle-active {
+    background: rgba(132, 204, 22, 0.35);
+    color: #ECFCCB;
+    box-shadow: 0 0 16px rgba(132, 204, 22, 0.25);
+}
+
+.p1-mission-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #F8FAFC;
+    font-weight: 600;
+}
+
+.p1-kpi-ribbon {
+    display: grid;
+    grid-template-columns: 1.35fr repeat(4, 1fr) 1.25fr;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.p1-kpi-main {
+    color: #F8FAFC;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.p1-kpi-number {
+    color: #F8FAFC;
+    font-size: 1.85rem;
+    line-height: 1.1;
+    font-family: "IBM Plex Mono", "Roboto Mono", monospace;
+}
+
+.p1-kpi-number span {
+    font-size: 0.8rem;
+    color: #94A3B8;
+}
+
+.p1-kpi-label.sustainability {
+    color: #A3E635;
+}
+
+.p1-kpi-label.fiscal {
+    color: #F97316;
+}
+
+.p1-kpi-label.security {
+    color: #60A5FA;
+}
+
+
+/* =============================================================================
+   PAGE 1 — LEFT JOURNEY RAIL
+============================================================================= */
+
+.p1-left-nav-test {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 6px 0;
+    margin: 0;
+
+    position: sticky;
+    top: 220px;
+    align-self: start;
+    z-index: 1;
+}
+
+.p1-nav-label {
+    color: #22D3EE;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+}
+
+.p1-nav-item {
+    display: grid;
+    grid-template-columns: 38px 1fr;
+    gap: 14px;
+
+    padding: 16px 10px;
+    margin-bottom: 42px;
+
+    color: #CBD5E1;
+    border-left: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.p1-nav-item.active {
+    background: rgba(132, 204, 22, 0.10);
+    border-left: 2px solid #A3E635;
+    border-radius: 10px;
+}
+
+.p1-nav-number {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #A3E635;
+}
+
+.p1-nav-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    letter-spacing: 0.04em;
+    line-height: 1.35;
+}
+
+.p1-nav-sub {
+    font-size: 0.78rem;
+    color: #94A3B8;
+    margin-top: 10px;
+    line-height: 1.45;
+}
+
+/* =============================================================================
+   PAGE 1 — READABLE MAIN CONTENT WIDTH
+============================================================================= */
+
+section.main div[data-testid="stVerticalBlock"] > div:has(.p1-content-shell) {
+    max-width: 1320px;
+}
+
+.p1-content-shell {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* =============================================================================
+   PAGE 1 — COMPACT COUNTRY SNAPSHOT
+============================================================================= */
+
+.p1-snapshot-ribbon {
+    display: grid;
+    grid-template-columns: 1.2fr repeat(5, 1fr);
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 14px;
+}
+
+.p1-snapshot-title,
+.p1-snapshot-card {
+    background: rgba(8, 18, 34, 0.78);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 10px;
+    padding: 10px 14px;
+}
+
+.p1-snapshot-title {
+    color: #22D3EE;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+}
+
+.p1-snapshot-card span {
+    display: block;
+    color: #94A3B8;
+    font-size: 0.68rem;
+    margin-bottom: 4px;
+}
+
+.p1-snapshot-card strong {
+    color: #F8FAFC;
+    font-size: 0.95rem;
+}
+
+/* =============================================================================
+   PAGE 1 — STICKY TOP HEADER ONLY
+============================================================================= */
+
+div[data-testid="stVerticalBlock"]:has(.p1-sticky-header-marker) {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #0B1220;
+    padding: 0.4rem 0 0.8rem 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+
+
+
+/* ============================================================
+   TYPOGRAPHY SYSTEM — EUROPEAN STRATEGY ATLAS
+   ============================================================ */
+
+.atlas-page-title-block {
+    margin: 0.25rem 0 1.2rem 0;
+}
+
+.atlas-page-title {
+    color: #F8FAFC;
+    font-size: 2.15rem;
+    line-height: 1.12;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    margin: 0;
+}
+
+.atlas-page-subtitle {
+    color: #CBD5E1;
+    font-size: 0.98rem;
+    line-height: 1.45;
+    margin-top: 0.45rem;
+    max-width: 920px;
+}
+
+/* Section titles */
+
+.atlas-section-title-block {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin: 1.65rem 0 0.95rem 0;
+}
+
+.atlas-section-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+
+    background: rgba(56,189,248,0.12);
+    border: 1px solid rgba(56,189,248,0.35);
+
+    border-radius: 10px;
+
+    color: #38BDF8;
+
+    font-size: 1rem;
+    font-weight: 900;
+
+    letter-spacing: 0.08em;
+
+    flex-shrink: 0;
+}
+
+.atlas-section-title {
+    color: #F8FAFC;
+    font-size: 1.48rem;
+    line-height: 1.22;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+    margin: 0;
+}
+
+.atlas-section-subtitle {
+    color: #CBD5E1;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    margin-top: 0.25rem;
+}
+
+/* Card titles */
+
+.atlas-card-title-block {
+    margin-bottom: 0.55rem;
+}
+
+.atlas-card-title {
+    color: #F8FAFC;
+    font-size: 1.02rem;
+    line-height: 1.25;
+    font-weight: 750;
+    margin: 0;
+}
+
+.atlas-card-subtitle {
+    color: #CBD5E1;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    margin-top: 0.2rem;
+}
+
+/* Body */
+
+.atlas-body-text {
+    color: #E2E8F0;
+    font-size: 0.92rem;
+    line-height: 1.58;
+    font-weight: 400;
+    margin: 0.35rem 0 0.65rem 0;
+}
+
+/* Labels */
+
+.atlas-label {
+    color: #94A3B8;
+    font-size: 0.72rem;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    margin-bottom: 0.35rem;
+}
+
+/* Metrics */
+
+.atlas-metric-block {
+    margin: 0.15rem 0 0.35rem 0;
+}
+
+.atlas-metric-value {
+    color: #F8FAFC;
+    font-family: "IBM Plex Mono", "Roboto Mono", monospace;
+    font-size: 1.24rem;
+    line-height: 1.2;
+    font-weight: 750;
+}
+
+.atlas-metric-label {
+    color: #94A3B8;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    margin-top: 0.15rem;
+}
+
+/* Investigation questions */
+
+.atlas-question-block {
+    border-left: 3px solid #38BDF8;
+    padding: 0.65rem 0.85rem;
+    margin: 0.75rem 0;
+    background: rgba(56, 189, 248, 0.07);
+    border-radius: 0.65rem;
+}
+
+.atlas-question-number {
+    color: #38BDF8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.atlas-question-text {
+    color: #F8FAFC;
+    font-size: 0.96rem;
+    line-height: 1.45;
+    font-weight: 650;
+}
+
+.atlas-question-context {
+    color: #CBD5E1;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    margin-top: 0.35rem;
+}
+
+/* Insight lists */
+
+.atlas-insight-list {
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.75rem;
+    margin: 0.65rem 0;
+    background: rgba(15, 23, 42, 0.72);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.atlas-insight-title {
+    color: #F8FAFC;
+    font-size: 0.9rem;
+    font-weight: 750;
+    margin-bottom: 0.45rem;
+}
+
+.atlas-insight-list ul {
+    margin: 0;
+    padding-left: 1.05rem;
+}
+
+.atlas-insight-list li {
+    color: #E2E8F0;
+    font-size: 0.86rem;
+    line-height: 1.55;
+    margin-bottom: 0.2rem;
+}
+
+.atlas-insight-advantage {
+    border-left: 3px solid #22C55E;
+}
+
+.atlas-insight-constraint {
+    border-left: 3px solid #EAB308;
+}
+
+.atlas-insight-risk {
+    border-left: 3px solid #EF4444;
+}
+
+.atlas-insight-neutral {
+    border-left: 3px solid #38BDF8;
+}
+
+/* Captions */
+
+.atlas-caption {
+    color: #94A3B8;
+    font-size: 0.76rem;
+    line-height: 1.4;
+    margin-top: 0.35rem;
+}
+
+
+
+.atlas-subsection-title {
+    color: #F8FAFC;
+    font-size: 1.18rem;
+    line-height: 1.25;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0.95rem 0 0.65rem 0;
+}
+
+/* SECTION 01 — identity card */
+.st-key-identity_card {
+    background: rgba(30, 64, 175, 0.22) !important;
+    border: 1px solid rgba(96, 165, 250, 0.32) !important;
+    border-radius: 14px !important;
+    padding: 0.9rem 1rem !important;
+}
+
+/* ============================================================
+   GLOBAL STREAMLIT TYPOGRAPHY OVERRIDES
+   Use this before replacing every st.subheader / st.info manually.
+   ============================================================ */
+
+/* Native st.subheader */
+h3 {
+    color: #F8FAFC !important;
+    font-size: 1.15rem !important;
+    line-height: 1.25 !important;
+    font-weight: 800 !important;
+    margin-top: 0.85rem !important;
+    margin-bottom: 0.6rem !important;
+}
+
+/* Markdown bold inside Streamlit cards */
+[data-testid="stMarkdownContainer"] strong {
+    color: #F8FAFC !important;
+    font-weight: 800 !important;
+}
+
+/* General markdown readability */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li {
+    color: #DDE7F3 !important;
+    font-size: 0.93rem !important;
+    line-height: 1.55 !important;
+}
+
+/* Captions */
+[data-testid="stCaptionContainer"] {
+    color: #B6C5D6 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+}
+
+/* Streamlit metric labels */
+[data-testid="stMetricLabel"] {
+    color: #CBD5E1 !important;
+    font-size: 0.82rem !important;
+}
+
+/* Streamlit metric values */
+[data-testid="stMetricValue"] {
+    color: #F8FAFC !important;
+    font-size: 1.35rem !important;
+}
+
+/* Streamlit metric deltas */
+[data-testid="stMetricDelta"] {
+    font-size: 0.82rem !important;
+}
+
+
+
+/* ============================================================
+   SECTION 03–05 FINAL STABILIZED CSS
+   Native alert styling + semantic wrapper styling
+   ============================================================ */
+
+/* Native alert base */
+[data-testid="stAlert"] {
+    border-radius: 12px !important;
+    padding: 0.55rem 0.75rem !important;
+    min-height: unset !important;
+}
+
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] li {
+    font-size: 0.92rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 0.25rem !important;
+    color: var(--atlas-text) !important;
+}
+
+[data-testid="stAlert"] strong {
+    font-size: 0.96rem !important;
+    font-weight: 850 !important;
+    color: var(--atlas-text) !important;
+}
+
+[data-testid="stAlert"] h3 {
+    font-size: 1.05rem !important;
+    margin: 0.15rem 0 !important;
+}
+
+/* Section 03 wrapper-key semantic colors */
+[class*="st-key-s03"][class*="info"] [data-testid="stAlert"],
+.st-key-s03_bottom_line [data-testid="stAlert"],
+.st-key-s03_question_1 [data-testid="stAlert"] {
+    background: rgba(56, 189, 248, 0.14) !important;
+    border: 1px solid rgba(56, 189, 248, 0.42) !important;
+}
+
+[class*="st-key-s03"][class*="strength"] [data-testid="stAlert"] {
+    background: rgba(74, 222, 128, 0.18) !important;
+    border: 1px solid rgba(74, 222, 128, 0.48) !important;
+}
+
+[class*="st-key-s03"][class*="constraint"] [data-testid="stAlert"] {
+    background: rgba(244, 114, 182, 0.18) !important;
+    border: 1px solid rgba(244, 114, 182, 0.48) !important;
+}
+
+/* Bordered Streamlit containers */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 14px !important;
+}
+
+/* Section subtitles */
+.atlas-section-subtitle {
+    font-size: 1.05rem !important;
+    color: #E2E8F0 !important;
+    line-height: 1.55 !important;
+}
+
+/* Section 05 buttons */
+div.stButton > button {
+    width: 100% !important;
+    background: linear-gradient(180deg, #38BDF8, #2563EB) !important;
+    color: white !important;
+    border: 1px solid #60A5FA !important;
+    border-radius: 12px !important;
+    font-weight: 850 !important;
+    padding: 0.75rem 1rem !important;
+}
+
+div.stButton > button:hover {
+    background: linear-gradient(180deg, #67E8F9, #3B82F6) !important;
+    color: white !important;
+    border-color: #93C5FD !important;
+}
+/* ============================================================
+   GLOBAL SECTION NUMBER — P1–P5
+   ============================================================ */
+
+.atlas-section-number {
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    color: #38BDF8 !important;
+    letter-spacing: 0.08em !important;
+}
+
+/* ============================================================
+   SECTION 03 — COMPARISON / GAP ANALYSIS
+   ============================================================ */
+
+.atlas-compare-note {
+    color: #CBD5E1;
+    font-size: 1rem;
+    font-weight: 650;
+    margin: 1rem 0 0.8rem 0;
+}
+
+.atlas-gap-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.atlas-gap-grid-bottom {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.atlas-gap-card {
+    background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 14px;
+    padding: 1rem 0.8rem;
+    min-height: 150px;
+    text-align: center;
+}
+
+.atlas-gap-dimension {
+    color: #F8FAFC;
+    font-size: 1rem;
+    font-weight: 850;
+    line-height: 1.25;
+    min-height: 2.4rem;
+}
+
+.atlas-gap-score-label {
+    color: #CBD5E1;
+    font-size: 0.78rem;
+    font-weight: 750;
+    margin-top: 0.55rem;
+}
+
+.atlas-gap-score {
+    color: #F8FAFC;
+    font-family: "IBM Plex Mono", "Roboto Mono", monospace;
+    font-size: 1.65rem;
+    font-weight: 850;
+    margin-top: 0.1rem;
+}
+
+.atlas-gap-pill {
+    display: inline-block;
+    margin-top: 0.45rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 999px;
+    font-family: "IBM Plex Mono", "Roboto Mono", monospace;
+    font-size: 0.95rem;
+    font-weight: 850;
+}
+
+.atlas-gap-status {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 850;
+}
+
+.atlas-gap-positive {
+    color: #22C55E;
+    background: rgba(34, 197, 94, 0.14);
+}
+
+.atlas-gap-negative {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.14);
+}
+
+.atlas-gap-neutral {
+    color: #CBD5E1;
+    background: rgba(148, 163, 184, 0.14);
+}
+
+.atlas-question-list {
+    margin-top: 0.6rem;
+    padding-left: 1rem;
+}
+
+
+
+/* P1-P5 section subtitle readability */
+.atlas-section-subtitle,
+[data-testid="stMarkdownContainer"] p {
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+/* Metric readability */
+[data-testid="stMetricLabel"] {
+    font-size: 1rem !important;
+    color: #F8FAFC !important;
+    font-weight: 750 !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-size: 1.55rem !important;
+    color: #F8FAFC !important;
+    font-weight: 800 !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-size: 1rem !important;
+    font-weight: 800 !important;
+}
+
+
+
+/* MVP metric readability */
+[data-testid="stMetricValue"] {
+    font-size: 2rem !important;
+    font-weight: 850 !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-size: 1rem !important;
+    font-weight: 850 !important;
+}
+
+/* SECTION 03 — MVP metric sizing */
+[data-testid="stMetricLabel"] {
+    font-size: 1.05rem !important;
+    font-weight: 850 !important;
+    color: #F8FAFC !important;
+}
+
+[data-testid="stMetricValue"] {
+    font-size: 1.75rem !important;
+    font-weight: 900 !important;
+    color: #F8FAFC !important;
+}
+
+[data-testid="stMetricDelta"] {
+    font-size: 1.05rem !important;
+    font-weight: 850 !important;
+}
+
+[data-testid="stMetric"] {
+    padding-bottom: 0.15rem !important;
+}
+
+
+/* ============================================================
+   SECTION 04 — VISUAL POLISH ONLY
+   Colors, spacing, fonts. No layout / logic change.
+   ============================================================ */
+/* ============================================================
+   FINAL P1 NATIVE ALERT SYSTEM
+   One semantic color layer for P1–P5
+   ============================================================ */
+
+[data-testid="stAlert"] {
+    border-radius: 12px !important;
+    padding: 0.55rem 0.75rem !important;
+    min-height: unset !important;
+}
+
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] li {
+    font-size: 0.92rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 0.25rem !important;
+    color: var(--atlas-text) !important;
+}
+
+[data-testid="stAlert"] strong {
+    font-size: 0.96rem !important;
+    font-weight: 850 !important;
+    color: var(--atlas-text) !important;
+}
+
+[data-testid="stAlert"] h3 {
+    font-size: 1.05rem !important;
+    margin: 0.15rem 0 !important;
+}
+
+/* Info / neutral / reference = blue */
+[data-testid="stAlert"][kind="info"] {
+    background: rgba(56, 189, 248, 0.14) !important;
+    border: 1px solid rgba(56, 189, 248, 0.42) !important;
+}
+
+/* Strength / advantage = bright green */
+[data-testid="stAlert"][kind="success"] {
+    background: rgba(74, 222, 128, 0.18) !important;
+    border: 1px solid rgba(74, 222, 128, 0.48) !important;
+}
+
+/* Constraint / tradeoff / limitation = magenta */
+[data-testid="stAlert"][kind="error"],
+[data-testid="stAlert"][kind="warning"] {
+    background: rgba(244, 114, 182, 0.18) !important;
+    border: 1px solid rgba(244, 114, 182, 0.48) !important;
+}
+
+/* Bordered Streamlit containers */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border: 1px solid rgba(56, 189, 248, 0.28) !important;
+    border-radius: 14px !important;
+}
+
+/* Section 05 buttons */
+div.stButton > button {
+    width: 100% !important;
+    background: linear-gradient(180deg, #38BDF8, #2563EB) !important;
+    color: white !important;
+    border: 1px solid #60A5FA !important;
+    border-radius: 12px !important;
+    font-weight: 850 !important;
+    padding: 0.75rem 1rem !important;
+}
+

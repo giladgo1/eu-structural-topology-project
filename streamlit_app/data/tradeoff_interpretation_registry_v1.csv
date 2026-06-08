@@ -1,0 +1,16 @@
+primary_output,secondary_output,pattern,interpretation
+Growth Potential,Fiscal Pressure,High/High,Growth-oriented strategy with elevated fiscal stress.
+Growth Potential,Fiscal Pressure,High/Low,Growth-oriented strategy with relatively manageable fiscal pressure.
+Growth Potential,Fiscal Pressure,Low/High,Low-growth profile under elevated fiscal constraint.
+Growth Potential,Sustainability Performance,High/Low,Growth-oriented profile with limited sustainability emphasis.
+Growth Potential,Sustainability Performance,Low/High,Transition-focused profile with weaker growth momentum.
+Growth Potential,Sustainability Performance,High/High,Strong dual-position profile combining growth capacity and sustainability strength.
+Resilience,Growth Potential,High/High,Strong strategic profile combining development capacity and resilience.
+Resilience,Growth Potential,High/Low,Defensive/resilient profile with limited growth momentum.
+Resilience,Growth Potential,Low/High,Growth-oriented but vulnerable profile under stress.
+Social Cohesion,Fiscal Pressure,High/High,Socially protective profile under elevated fiscal strain.
+Social Cohesion,Fiscal Pressure,High/Low,Socially stable profile with manageable fiscal pressure.
+Social Cohesion,Fiscal Pressure,Low/High,Socially vulnerable and fiscally constrained profile.
+Innovation Readiness,Resilience,High/Low,Innovation-oriented profile with weaker shock absorption.
+Innovation Readiness,Resilience,High/High,Future-ready profile combining innovation capacity and resilience.
+Innovation Readiness,Resilience,Low/High,Resilient but less innovation-ready profile.

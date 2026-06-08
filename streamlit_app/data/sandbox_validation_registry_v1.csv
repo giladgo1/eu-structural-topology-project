@@ -1,0 +1,5 @@
+relationship,pearson,spearman,corr_gap,family_spread,screening_classification,follow_up_note
+Relationship 03: Social Protection → Social Stability,0.7088436711879642,0.6874236874236873,0.021419983764276895,0.6295797213380852,Mixed Candidate,
+Relationship 03: Social Protection → Social Stability,0.7088436711879642,0.6874236874236873,0.021419983764276895,0.6295797213380852,Mixed Candidate,
+Relationship 06: Social Protection → Innovation,0.6045723327559006,0.562881562881563,0.04169076987433762,0.3775444508856,Mixed Candidate,Revisit with family-normalized analysis
+Relationship 07: Environment → Sustainability,0.11826580315956503,0.13982598239537625,0.021560179235811217,0.4830345295771219,Conditional Candidate,Check family and subfamily effects
