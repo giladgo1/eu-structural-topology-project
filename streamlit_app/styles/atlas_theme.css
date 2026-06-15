@@ -1377,3 +1377,351 @@ P2 JOURNEY LOG EXPANDER
 [data-testid="stExpander"] details summary:hover {
     background: rgba(56,189,248,0.22) !important;
 }
+
+/* =============================================================================
+   MVP COMPACT POLISH v1 — P1/P2 readability without content removal
+   Rule: compress whitespace, not learning content.
+============================================================================= */
+
+.block-container {
+    padding-top: 1.6rem !important;
+    padding-left: 1.6rem !important;
+    padding-right: 1.6rem !important;
+    padding-bottom: 2.5rem !important;
+}
+
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li {
+    font-size: 0.98rem !important;
+    line-height: 1.45 !important;
+}
+
+.atlas-card {
+    padding: 0.9rem 1rem !important;
+    margin-bottom: 0.75rem !important;
+}
+
+.p1-brand,
+.p1-context-card,
+.p1-kpi-card {
+    padding: 12px 15px !important;
+}
+
+.p1-kpi-ribbon {
+    gap: 9px !important;
+    margin-bottom: 12px !important;
+}
+
+.p1-kpi-number {
+    font-size: 1.78rem !important;
+}
+
+.p1-kpi-main {
+    font-size: 0.98rem !important;
+    line-height: 1.20 !important;
+}
+
+.p1-kpi-sub {
+    font-size: 0.76rem !important;
+}
+
+.p1-left-nav-test {
+    top: 190px !important;
+}
+
+.p1-nav-label {
+    margin-bottom: 12px !important;
+}
+
+.p1-nav-item {
+    padding: 12px 8px !important;
+    margin-bottom: 30px !important;
+}
+
+.p1-nav-title {
+    font-size: 0.84rem !important;
+}
+
+.p1-nav-sub {
+    font-size: 0.80rem !important;
+    margin-top: 6px !important;
+}
+
+.atlas-section-title-block {
+    margin: 1.05rem 0 0.62rem 0 !important;
+    gap: 0.72rem !important;
+}
+
+.atlas-section-number {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 0.95rem !important;
+}
+
+.atlas-section-title {
+    font-size: 1.58rem !important;
+    line-height: 1.18 !important;
+}
+
+.atlas-section-subtitle {
+    font-size: 1.08rem !important;
+    line-height: 1.42 !important;
+    margin-top: 0.12rem !important;
+}
+
+.atlas-subsection-title {
+    margin: 0.75rem 0 0.45rem 0 !important;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border-radius: 13px !important;
+}
+
+/* P1 CTA button semantic hierarchy */
+.st-key-p1_cta_tradeoff_full button {
+    background: linear-gradient(180deg, #4ADE80, #16A34A) !important;
+    border-color: #86EFAC !important;
+    box-shadow: 0 0 14px rgba(74,222,128,0.30), 0 0 24px rgba(22,163,74,0.20) !important;
+}
+
+.st-key-p1_cta_strategy_full button {
+    background: linear-gradient(180deg, #F59E0B, #D97706) !important;
+    border-color: #FBBF24 !important;
+    box-shadow: 0 0 14px rgba(245,158,11,0.30), 0 0 24px rgba(217,119,6,0.20) !important;
+}
+
+.st-key-p1_cta_compare_full button {
+    background: rgba(34,211,238,0.13) !important;
+    color: #22D3EE !important;
+    border-color: rgba(34,211,238,0.55) !important;
+    box-shadow: none !important;
+}
+
+.st-key-p1_cta_save_learning button {
+    background: rgba(168,85,247,0.12) !important;
+    color: #C084FC !important;
+    border-color: rgba(168,85,247,0.48) !important;
+    box-shadow: none !important;
+}
+
+/* Table density: preserve readability, reduce empty vertical space */
+.atlas-mission-table {
+    font-size: 0.86rem !important;
+}
+
+.atlas-mission-table th {
+    padding: 9px 10px !important;
+}
+
+.atlas-mission-table td {
+    padding: 10px !important;
+    line-height: 1.32 !important;
+}
+
+
+/* =============================================================================
+   P1 v10 density/button refinements
+   Compress whitespace, not learning content.
+============================================================================= */
+.st-key-p1_btn_tradeoff button { background:linear-gradient(180deg,#4ADE80,#16A34A) !important; border-color:#86EFAC !important; box-shadow:0 0 14px rgba(74,222,128,0.30),0 0 24px rgba(22,163,74,0.20) !important; }
+.st-key-p1_btn_strategy button { background:linear-gradient(180deg,#F59E0B,#D97706) !important; border-color:#FBBF24 !important; box-shadow:0 0 14px rgba(245,158,11,0.30),0 0 24px rgba(217,119,6,0.20) !important; }
+.st-key-p1_btn_compare button { background:rgba(34,211,238,0.14) !important; color:#22D3EE !important; border-color:rgba(34,211,238,0.55) !important; box-shadow:none !important; }
+.st-key-p1_btn_reflect button { background:rgba(168,85,247,0.14) !important; color:#C084FC !important; border-color:rgba(168,85,247,0.55) !important; box-shadow:none !important; }
+
+/* ============================================================
+   P1 v11 — button + compact bugfix overrides
+   ============================================================ */
+[class*="st-key-p1_btn_tradeoff"] button,
+[class*="st-key-p1_cta_tradeoff_full"] button {
+    background: linear-gradient(180deg,#4ADE80,#16A34A) !important;
+    border-color: #86EFAC !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(74,222,128,0.30),0 0 24px rgba(22,163,74,0.20) !important;
+}
+
+[class*="st-key-p1_btn_strategy"] button,
+[class*="st-key-p1_cta_strategy_full"] button {
+    background: linear-gradient(180deg,#F59E0B,#D97706) !important;
+    border-color: #FBBF24 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(245,158,11,0.30),0 0 24px rgba(217,119,6,0.20) !important;
+}
+
+[class*="st-key-p1_btn_reflect"] button,
+[class*="st-key-p1_cta_save_learning"] button {
+    background: linear-gradient(180deg,#A855F7,#7C3AED) !important;
+    border-color: #C084FC !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(168,85,247,0.30),0 0 24px rgba(124,58,237,0.20) !important;
+}
+
+.atlas-inline-button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    text-decoration: none !important;
+    border-radius: 12px;
+    font-weight: 850;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+.atlas-inline-button-compare {
+    background: linear-gradient(180deg,#22D3EE,#0891B2) !important;
+    border: 1px solid #67E8F9 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(34,211,238,0.28),0 0 24px rgba(8,145,178,0.18) !important;
+}
+
+.atlas-inline-button-compare:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 18px rgba(34,211,238,0.46),0 0 30px rgba(8,145,178,0.28) !important;
+}
+
+/* Make meaning sit on numbers, not explanatory sentence */
+.atlas-gap-delta,
+.atlas-gap-status {
+    color: #CBD5E1 !important;
+}
+
+
+/* ============================================================
+   P1 v12 — robust CTA button coloring + invisible top anchor
+   ============================================================ */
+.p1-scroll-anchor {
+    display: block !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.p1-btn-tradeoff-marker) button,
+[class*="st-key-p1_btn_tradeoff"] button,
+button[kind="primary"][data-testid="baseButton-primary"] {
+    background: linear-gradient(180deg, #4ADE80, #16A34A) !important;
+    border: 1px solid #86EFAC !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(74,222,128,0.30), 0 0 24px rgba(22,163,74,0.20) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.p1-btn-strategy-marker) button,
+[class*="st-key-p1_btn_strategy"] button {
+    background: linear-gradient(180deg, #F59E0B, #D97706) !important;
+    border: 1px solid #FBBF24 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(245,158,11,0.30), 0 0 24px rgba(217,119,6,0.20) !important;
+}
+
+div[data-testid="stVerticalBlock"]:has(.p1-btn-reflect-marker) button,
+[class*="st-key-p1_btn_reflect"] button,
+[class*="st-key-p1_cta_save_learning"] button {
+    background: linear-gradient(180deg, #A855F7, #7C3AED) !important;
+    border: 1px solid #C084FC !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 0 14px rgba(168,85,247,0.30), 0 0 24px rgba(124,58,237,0.20) !important;
+}
+
+.atlas-inline-button-compare {
+    background: linear-gradient(180deg, #22D3EE, #0891B2) !important;
+    border: 1px solid #67E8F9 !important;
+    color: #FFFFFF !important;
+}
+
+/* =============================================================================
+   P1 V13 — SIMPLE BUTTONS, NO PURPLE CTA OVERRIDES
+   ============================================================================= */
+
+/* Keep all P1 action buttons the same Atlas blue gradient. */
+[class*="st-key-p1_btn_tradeoff"] button,
+[class*="st-key-p1_btn_strategy"] button,
+[class*="st-key-p1_btn_reflect"] button {
+    background: linear-gradient(90deg, #38BDF8 0%, #2563EB 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(56, 189, 248, 0.85) !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.28) !important;
+}
+
+[class*="st-key-p1_btn_tradeoff"] button:hover,
+[class*="st-key-p1_btn_strategy"] button:hover,
+[class*="st-key-p1_btn_reflect"] button:hover {
+    background: linear-gradient(90deg, #67E8F9 0%, #3B82F6 100%) !important;
+    color: #FFFFFF !important;
+}
+
+/* Compare anchor should visually match the other action buttons. */
+.atlas-inline-button-compare,
+a.atlas-inline-button-compare {
+    background: linear-gradient(90deg, #38BDF8 0%, #2563EB 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(56, 189, 248, 0.85) !important;
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.28) !important;
+}
+
+.atlas-inline-button-compare:hover,
+a.atlas-inline-button-compare:hover {
+    background: linear-gradient(90deg, #67E8F9 0%, #3B82F6 100%) !important;
+    color: #FFFFFF !important;
+}
+
+/* Remove purple/amber CTA accents on P1 cards; keep simple blue action language. */
+.atlas-cta-navigation,
+.atlas-cta-challenge,
+.atlas-cta-compare,
+.atlas-cta-reflect {
+    border-left: 4px solid #38BDF8 !important;
+}
+
+/* Neutralize remaining P1 button-specific color overrides from older patch attempts. */
+.st-key-p1_btn_tradeoff button,
+.st-key-p1_btn_strategy button,
+.st-key-p1_btn_reflect button {
+    background: linear-gradient(90deg, #38BDF8 0%, #2563EB 100%) !important;
+    color: #FFFFFF !important;
+    border-color: rgba(56, 189, 248, 0.85) !important;
+}
+
+/* =============================================================================
+   P1 v14 MVP correction: restore Mission Log panel, remove bottom log table only.
+   Keep all P1 action buttons one consistent blue style.
+   ============================================================================= */
+.st-key-p1_btn_tradeoff button,
+.st-key-p1_btn_strategy button,
+.st-key-p1_btn_compare button,
+.st-key-p1_btn_reflect button,
+.st-key-p1_cta_tradeoff_full button,
+.st-key-p1_cta_strategy_full button,
+.st-key-p1_cta_compare_full button,
+.st-key-p1_cta_save_learning button {
+    background: linear-gradient(180deg, #38BDF8, #2563EB) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(125, 211, 252, 0.80) !important;
+    box-shadow: 0 0 14px rgba(56,189,248,0.28), 0 0 24px rgba(37,99,235,0.20) !important;
+}
+.st-key-p1_btn_tradeoff button:hover,
+.st-key-p1_btn_strategy button:hover,
+.st-key-p1_btn_compare button:hover,
+.st-key-p1_btn_reflect button:hover,
+.st-key-p1_cta_tradeoff_full button:hover,
+.st-key-p1_cta_strategy_full button:hover,
+.st-key-p1_cta_compare_full button:hover,
+.st-key-p1_cta_save_learning button:hover {
+    filter: brightness(1.06) !important;
+}
+[data-testid="stTooltipIcon"] { display: none !important; }
+
+/* ==========================================================
+   HIDE STREAMLIT DEFAULT PAGE NAVIGATION — MVP SAFE
+   Keep sidebar shell stable; remove only Streamlit's auto page list.
+   ========================================================== */
+
+[data-testid="stSidebarNav"] {
+    display: none !important;
+}
+
+[data-testid="stSidebarNav"] * {
+    display: none !important;
+}

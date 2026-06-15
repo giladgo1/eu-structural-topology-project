@@ -1,8 +1,8 @@
 """
 p3_strategic_choices.py
 
-European Strategy Atlas — Page 3
-Strategic Choices / Sandbox MVP Model 0
+EUROPEAN STRATEGY ATLAS — Page 3
+Invest & Strategy / Sandbox current version Model 0 — v04 state/log polish
 
 Implements:
 - P2-style learning flow, right mission log, bottom journey log, CTA cards
@@ -30,6 +30,15 @@ from components.page_frame import (
     render_left_rail_placeholder,
     render_footer,
 )
+
+from utils.atlas_state import (
+    init_atlas_state,
+    update_atlas_context,
+    add_journey_event,
+    get_journey_log_df,
+)
+from utils.journey_progress import render_journey_progress
+
 
 
 # =============================================================================
@@ -409,6 +418,82 @@ st.html(
     .p3-allocation-card + div {
         margin-top: 4px;
     }
+
+
+    /* P3 current version compact strategy workspace: simulate the successful 80% view only inside Section 02. */
+    .st-key-p3_strategy_workspace {
+        zoom: 0.90;
+        transform-origin: top left;
+    }
+    .st-key-p3_strategy_workspace h3 {
+        font-size: 1.02rem !important;
+        margin: 0.15rem 0 0.35rem 0 !important;
+    }
+    .st-key-p3_strategy_workspace .p3-section-hint {
+        font-size: 0.86rem;
+        line-height: 1.32;
+        margin-bottom: 8px;
+    }
+    .st-key-p3_strategy_workspace .p3-choice-help {
+        padding: 10px 11px;
+        margin-bottom: 8px;
+    }
+    .st-key-p3_strategy_workspace .p3-choice-help-text {
+        font-size: 0.84rem;
+        line-height: 1.26;
+    }
+    .st-key-p3_strategy_workspace .p3-allocation-card {
+        padding: 12px 13px;
+        margin-top: 6px;
+    }
+    .st-key-p3_strategy_workspace .p3-stepper-value {
+        font-size: 0.94rem;
+        padding-top: 0.38rem;
+    }
+    .st-key-p3_strategy_workspace .p3-row-delta {
+        font-size: 0.86rem;
+    }
+    .st-key-p3_strategy_workspace .p3-output-table-card {
+        padding: 13px 14px;
+    }
+    .st-key-p3_strategy_workspace .p3-output-table-title {
+        font-size: 1.02rem;
+    }
+    .st-key-p3_strategy_workspace .p3-output-table-subtitle {
+        font-size: 0.84rem;
+        margin-bottom: 9px;
+    }
+    .st-key-p3_strategy_workspace .p3-mini-summary-grid {
+        gap: 7px;
+        margin-bottom: 9px;
+    }
+    .st-key-p3_strategy_workspace .p3-mini-summary-card {
+        min-height: 76px;
+        padding: 9px 9px;
+    }
+    .st-key-p3_strategy_workspace .p3-mini-summary-value {
+        font-size: 0.86rem;
+    }
+    .st-key-p3_strategy_workspace .p3-mini-summary-delta {
+        font-size: 0.84rem;
+    }
+    .st-key-p3_strategy_workspace .p3-output-table {
+        font-size: 0.86rem;
+    }
+    .st-key-p3_strategy_workspace .p3-output-table td {
+        padding: 8px 6px;
+    }
+    .st-key-p3_strategy_workspace .p3-output-table th {
+        padding: 7px 6px;
+        font-size: 0.70rem;
+    }
+    .st-key-p3_strategy_workspace div[data-testid="stButton"] button {
+        min-height: 2.25rem;
+        padding: 0.35rem 0.55rem;
+        font-size: 0.86rem;
+        line-height: 1.2;
+    }
+
     </style>
     """
 )
@@ -588,7 +673,7 @@ SLIDER_SHORT_LABELS = {
     "Defense": "Defense",
 }
 
-# Transparent MVP direction layer.
+# Transparent current version direction layer.
 RESPONSE_DIRECTION = {
     ("Education", "Human Capital"): 1,
     ("Education", "Innovation"): 1,
@@ -1023,6 +1108,29 @@ def render_output_card(title: str, before: float, after: float):
 
 
 
+
+def render_p3_result_card(title: str, value: str, detail: str, status: str, accent: str):
+    """Compact result card with visible feeling color in the main value."""
+    st.html(
+        f"""
+        <div style="
+            min-height:116px;
+            border-radius:16px;
+            border:1px solid {accent}66;
+            border-left:5px solid {accent};
+            background:rgba(30,58,95,0.58);
+            padding:14px 16px;
+            box-shadow:0 0 18px {accent}18;
+        ">
+            <div style="color:#F8FAFC; font-size:0.88rem; font-weight:900; margin-bottom:8px;">{title}</div>
+            <div style="color:{accent}; font-family:'IBM Plex Mono','Roboto Mono',monospace; font-size:1.34rem; font-weight:950; line-height:1.12; margin-bottom:7px;">{value}</div>
+            <div style="color:{accent}; font-size:0.88rem; font-weight:900; line-height:1.28; margin-bottom:6px;">{detail}</div>
+            <div style="color:#E2E8F0; font-size:0.82rem; line-height:1.32; font-weight:700;">{status}</div>
+        </div>
+        """
+    )
+
+
 def render_strategy_test_results_table(last_outputs: dict[str, float], test_outputs: dict[str, float], gain_name: str, gain_delta: float, cost_name: str, cost_delta: float, confidence_score: int, confidence_label: str):
     """Compact table replacing the 2×3 output cards in the strategy workspace."""
     rows = []
@@ -1119,44 +1227,49 @@ def render_p3_mission_log_panel(entry: dict):
 
 
 def render_journey_log_html(log_df: pd.DataFrame):
-    """Full-width P2-style journey log table with readable column spread."""
-    display_df = log_df.copy()
+    """Compact shared Atlas journey log: newest actions first, P2/P3/P4 compatible."""
+    if log_df is None or log_df.empty:
+        display_df = pd.DataFrame(
+            columns=["Step", "Page", "Country", "Reference", "Topic", "Observation", "Next"]
+        )
+    else:
+        display_df = log_df.copy()
+        if "step" in display_df.columns:
+            display_df = display_df.sort_values("step", ascending=False)
+        display_df = display_df.head(8)
 
-    preferred_cols = [
-        "step",
-        "page",
-        "country",
-        "strategy",
-        "allocation",
-        "largest_gain",
-        "largest_cost",
-        "evidence",
-        "family_context",
-        "learning",
-        "next_step",
-    ]
-    display_cols = [col for col in preferred_cols if col in display_df.columns]
-    display_df = display_df[display_cols]
+        # Shared atlas_state schema.
+        rename_map = {
+            "step": "Step",
+            "page": "Page",
+            "country": "Country",
+            "reference": "Reference",
+            "topic": "Topic",
+            "observation": "Observation",
+            "next_step": "Next",
+        }
+        keep_cols = [col for col in rename_map if col in display_df.columns]
+        display_df = display_df[keep_cols].rename(columns=rename_map)
+
+        for col in ["Step", "Page", "Country", "Reference", "Topic", "Observation", "Next"]:
+            if col not in display_df.columns:
+                display_df[col] = ""
+        display_df = display_df[["Step", "Page", "Country", "Reference", "Topic", "Observation", "Next"]]
 
     column_widths = {
-        "step": "4%",
-        "page": "9%",
-        "country": "8%",
-        "strategy": "10%",
-        "allocation": "24%",
-        "largest_gain": "10%",
-        "largest_cost": "10%",
-        "evidence": "8%",
-        "family_context": "11%",
-        "learning": "22%",
-        "next_step": "10%",
+        "Step": "5%",
+        "Page": "13%",
+        "Country": "9%",
+        "Reference": "12%",
+        "Topic": "18%",
+        "Observation": "34%",
+        "Next": "9%",
     }
-
     colgroup = "".join(
-        f'<col style="width:{column_widths.get(col, "10%")};">'
+        f'<col style="width:{column_widths.get(col, "120px")};">'
         for col in display_df.columns
     )
-    headers = "".join(f"<th>{col.replace('_', ' ')}</th>" for col in display_df.columns)
+    headers = "".join(f"<th>{col}</th>" for col in display_df.columns)
 
     rows = []
     for _, row in display_df.iterrows():
@@ -1171,17 +1284,16 @@ def render_journey_log_html(log_df: pd.DataFrame):
             border-radius:16px;
             border:1px solid rgba(56,189,248,0.34);
             background:rgba(15,23,42,0.72);
-            padding:16px;
+            padding:14px;
             overflow-x:auto;
         ">
-            <div style="color:#F8FAFC; font-size:1.05rem; font-weight:900; margin-bottom:6px;">
-                Journey Log Table
+            <div style="color:#F8FAFC; font-size:1rem; font-weight:900; margin-bottom:4px;">
+                Journey Log
             </div>
-            <div style="color:#CBD5E1; font-size:0.86rem; margin-bottom:14px;">
-                Full-width record of P3 strategy tests. This becomes input for P4 Challenge and P5 Reflection.
+            <div style="color:#CBD5E1; font-size:0.82rem; margin-bottom:12px;">
+                Latest actions first. Full details remain stored for P5/export.
             </div>
             <table style="
-                min-width:1500px;
                 width:100%;
                 border-collapse:collapse;
                 table-layout:fixed;
@@ -1199,18 +1311,18 @@ def render_journey_log_html(log_df: pd.DataFrame):
                 background:rgba(56,189,248,0.14);
                 color:#E0F2FE;
                 border:1px solid rgba(148,163,184,0.40);
-                padding:10px 9px;
+                padding:9px 8px;
                 text-align:left;
-                font-size:0.72rem;
+                font-size:0.74rem;
                 font-weight:900;
                 letter-spacing:0.04em;
                 text-transform:uppercase;
             }}
             table td {{
                 border:1px solid rgba(148,163,184,0.32);
-                padding:11px 9px;
+                padding:9px 8px;
                 vertical-align:top;
-                line-height:1.36;
+                line-height:1.34;
                 background:rgba(51,65,85,0.78);
                 word-wrap:break-word;
             }}
@@ -1226,8 +1338,7 @@ def render_journey_log_html(log_df: pd.DataFrame):
 # PAGE CONFIG
 # =============================================================================
 
-st.markdown("## P3 — Strategic Choices")
-st.caption("Sandbox MVP. Strategy outputs update only when you run a test.")
+st.markdown("## P3 — Invest & Strategy")
 
 
 # =============================================================================
@@ -1235,6 +1346,30 @@ st.caption("Sandbox MVP. Strategy outputs update only when you run a test.")
 # =============================================================================
 
 country_options = sorted(DATA["country_profiles"]["country_name"].dropna().unique().tolist())
+
+init_atlas_state(
+    default_country="Germany",
+    default_reference="Family Average",
+    default_reference_country="Sweden",
+    default_view_mode="Relative",
+)
+
+atlas_country = st.session_state.get("atlas_country", "Germany")
+atlas_reference_type = st.session_state.get("atlas_reference_type", "Family Average")
+atlas_reference_country = st.session_state.get("atlas_reference_country", "Sweden")
+atlas_view_mode = st.session_state.get("atlas_view_mode", "Relative")
+
+if atlas_country not in country_options:
+    atlas_country = "Germany" if "Germany" in country_options else country_options[0]
+if atlas_reference_country not in country_options:
+    atlas_reference_country = "Sweden" if "Sweden" in country_options else country_options[0]
+
+reference_options = ["EU Average", "Family Average", "Another Country"]
+if atlas_reference_type not in reference_options:
+    atlas_reference_type = "Family Average"
+view_options = ["Relative", "Absolute"]
+if atlas_view_mode not in view_options:
+    atlas_view_mode = "Relative"
 
 top_col1, top_col2, top_col3, top_col_ref_country, top_col4 = st.columns(
     [1.8, 1.05, 1.15, 1.15, 0.9],
@@ -1258,14 +1393,16 @@ with top_col2:
     selected_country = st.selectbox(
         "Country",
         options=country_options,
-        index=country_options.index("Germany") if "Germany" in country_options else 0,
+        index=country_options.index(atlas_country),
+        key="p3_global_country_v01",
     )
 
 with top_col3:
     selected_reference = st.selectbox(
         "Reference",
-        options=["EU Average", "Family Average", "Another Country"],
-        index=1,
+        options=reference_options,
+        index=reference_options.index(atlas_reference_type),
+        key="p3_global_reference_v01",
     )
 
 with top_col_ref_country:
@@ -1273,7 +1410,8 @@ with top_col_ref_country:
         reference_country = st.selectbox(
             "Reference Country",
             options=country_options,
-            index=country_options.index("Sweden") if "Sweden" in country_options else 0,
+            index=country_options.index(atlas_reference_country),
+            key="p3_global_reference_country_v01",
         )
     else:
         reference_country = None
@@ -1282,10 +1420,20 @@ with top_col_ref_country:
 with top_col4:
     view_mode = st.radio(
         "View Mode",
-        options=["Relative", "Absolute"],
+        options=view_options,
         horizontal=True,
-        index=0,
+        index=view_options.index(atlas_view_mode),
+        key="p3_global_view_mode_v01",
     )
+
+update_atlas_context(
+    country=selected_country,
+    reference_type=selected_reference,
+    reference_country=reference_country if selected_reference == "Another Country" else atlas_reference_country,
+    view_mode=view_mode,
+    source_page="P3 Invest & Strategy",
+    log_context_change=True,
+)
 
 
 # =============================================================================
@@ -1303,6 +1451,7 @@ if st.session_state.get("p3_country_state_key") != country_state_key:
     st.session_state["p3_selected_strategy"] = "Balanced Development"
     st.session_state["p3_current_allocation"] = baseline_allocation.copy()
     st.session_state["p3_last_run_allocation"] = baseline_allocation.copy()
+    st.session_state["p3_last_run_strategy"] = "No run yet"
     st.session_state["p3_run_outputs"] = None
     st.session_state["p3_has_run"] = False
     for slider_name, value in baseline_allocation.items():
@@ -1312,6 +1461,7 @@ st.session_state.setdefault("p3_mission_log", [])
 st.session_state.setdefault("p3_selected_strategy", "Balanced Development")
 st.session_state.setdefault("p3_current_allocation", baseline_allocation.copy())
 st.session_state.setdefault("p3_last_run_allocation", baseline_allocation.copy())
+st.session_state.setdefault("p3_last_run_strategy", "No run yet")
 st.session_state.setdefault("p3_run_outputs", None)
 st.session_state.setdefault("p3_has_run", False)
 
@@ -1320,12 +1470,39 @@ for slider_name, value in st.session_state["p3_current_allocation"].items():
 
 
 def apply_strategy_preset(strategy_name: str):
+    """Load a new strategy package into the editable draft.
+
+    current version rule: selecting a different predefined strategy starts a new test,
+    so old P3 results are cleared. The shared journey log is not deleted.
+    """
+    previous_strategy = st.session_state.get("p3_selected_strategy", "Balanced Development")
+    strategy_changed = previous_strategy != strategy_name
+
     st.session_state["p3_selected_strategy"] = strategy_name
     for slider_name, value in STRATEGY_PRESETS[strategy_name].items():
         st.session_state[f"p3_slider_{slider_name}"] = int(value)
 
+    if strategy_changed:
+        st.session_state["p3_last_run_allocation"] = st.session_state["p3_current_allocation"].copy()
+        st.session_state["p3_last_run_strategy"] = "No run yet"
+        st.session_state["p3_run_outputs"] = None
+        st.session_state["p3_has_run"] = False
+        st.session_state["p3_mission_log"] = []
+
 
 def reset_to_country_baseline():
+    for slider_name, value in st.session_state["p3_current_allocation"].items():
+        st.session_state[f"p3_slider_{slider_name}"] = int(value)
+
+
+def reset_p3_workspace():
+    """Reset the current P3 workspace, but keep the shared Atlas journey log."""
+    st.session_state["p3_selected_strategy"] = "Balanced Development"
+    st.session_state["p3_last_run_allocation"] = st.session_state["p3_current_allocation"].copy()
+    st.session_state["p3_last_run_strategy"] = "No run yet"
+    st.session_state["p3_run_outputs"] = None
+    st.session_state["p3_has_run"] = False
+    st.session_state["p3_mission_log"] = []
     for slider_name, value in st.session_state["p3_current_allocation"].items():
         st.session_state[f"p3_slider_{slider_name}"] = int(value)
 
@@ -1390,7 +1567,7 @@ st.html(
     <div class="p1-kpi-ribbon">
         <div class="p1-kpi-card">
             <div class="p1-kpi-label">CURRENT PAGE</div>
-            <div class="p1-kpi-main">P3 Strategic Choices</div>
+            <div class="p1-kpi-main">P3 Invest & Strategy</div>
             <div class="p1-kpi-sub">Choose stage</div>
         </div>
         <div class="p1-kpi-card">
@@ -1422,6 +1599,16 @@ st.html(
     """
 )
 
+render_journey_progress(3)
+
+st.html(
+    """
+    <div style="color:#38BDF8; font-size:0.96rem; font-weight:850; line-height:1.45; margin:6px 0 14px 0;">
+        Choose a strategy package → adjust investment shares → run the strategy test → read the output changes.
+    </div>
+    """
+)
+
 render_page_intro()
 
 
@@ -1440,7 +1627,7 @@ sections = [
 ]
 
 with left_col:
-    render_left_rail_placeholder(page_number=3, page_title="Strategic Choices", sections=sections)
+    render_left_rail_placeholder(page_number=3, page_title="Invest & Strategy", sections=sections)
 
 with main_col:
 
@@ -1488,319 +1675,345 @@ with main_col:
             "#F59E0B",
         )
 
-    # =========================================================================
-    # SECTION 02 — FOUR-COLUMN STRATEGY ROOM
-    # =========================================================================
+    with st.container(key="p3_strategy_workspace"):
+        # =========================================================================
+        # SECTION 02 — FOUR-COLUMN STRATEGY ROOM
+        # =========================================================================
 
-    render_section_title(
-        number="02",
-        title="Build and test one strategy package",
-        subtitle=(
-            "Choose a predefined package or build your own allocation. "
-            "Edit the New package in 5% steps, run the test, then read the latest executed result. "
-            "Inputs and outputs stay together."
-        ),
-    )
-
-    # Free allocation input: do not constrain while editing.
-    # The learning point is that the strategy package must total exactly 100% before it can run.
-    new_allocation = {
-        slider_name: int(st.session_state[f"p3_slider_{slider_name}"])
-        for slider_name in SLIDER_NAMES
-    }
-    total_allocation = sum(new_allocation.values())
-    mission_allocation = STRATEGY_PRESETS[st.session_state["p3_selected_strategy"]]
-
-    st.html(
-        """
-        <div style="
-            border:1px solid rgba(56,189,248,0.28);
-            border-radius:16px;
-            padding:12px 16px;
-            background:rgba(15,23,42,0.72);
-            margin-bottom:16px;
-        ">
-            <div style="color:#38BDF8; font-size:0.74rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; margin-bottom:5px;">
-                How this workspace works
-            </div>
-            <div style="color:#E2E8F0; font-size:0.98rem; line-height:1.45; font-weight:700;">
-                <b>1 Choose</b> a package → <b>2 Edit</b> the New allocation → <b>3 Run</b> the strategy test → <b>4 Observe</b> the latest result.
-                The country column is the baseline; Last is the executed strategy; New is the draft waiting for Run.
-            </div>
-        </div>
-        """
-    )
-
-    strategy_col, package_col, controls_col, result_col = st.columns(
-        [1.0, 1.95, 0.78, 1.82],
-        gap="medium",
-    )
-
-    # -------------------------------------------------------------------------
-    # COLUMN 1 — PREDEFINED STRATEGY PACKAGES
-    # -------------------------------------------------------------------------
-
-    with strategy_col:
-        st.markdown("### 1 · Choose")
-        st.html(
-            """
-            <div class="p3-choice-help">
-                <div class="p3-choice-help-title">Predefined packages</div>
-                <div class="p3-choice-help-text">
-                    Choose one starting package. It loads the <b>New</b> draft. You can still adjust every priority before Run.
-                </div>
-            </div>
-            """
+        render_section_title(
+            number="02",
+            title="Build and test one strategy package",
+            subtitle=(
+                "Choose a predefined package or build your own allocation. "
+                "Edit the New package in 5% steps, run the test, then read the latest executed result. "
+                "Inputs and outputs stay together."
+            ),
         )
 
-        for strategy_name in STRATEGY_PRESETS.keys():
-            selected = st.session_state["p3_selected_strategy"] == strategy_name
-            label = f"✓ {strategy_name}" if selected else strategy_name
-
-            # The button is the selection object. No duplicate card under each button.
-            if st.button(
-                label,
-                key=f"p3_strategy_button_{strategy_name}",
-                use_container_width=True,
-            ):
-                apply_strategy_preset(strategy_name)
-                st.rerun()
-
-        selected_strategy = st.session_state["p3_selected_strategy"]
-        selected_color = STRATEGY_COLORS[selected_strategy]
-        selected_package_text = allocation_to_text(STRATEGY_PRESETS[selected_strategy])
-
-        st.html(
-            f"""
-            <div style="
-                margin-top:14px;
-                border:1px solid {selected_color};
-                border-left:5px solid {selected_color};
-                border-radius:14px;
-                padding:14px 15px;
-                background:rgba(15,23,42,0.82);
-                box-shadow:0 0 18px {selected_color}33;
-            ">
-                <div style="color:{selected_color}; font-size:0.72rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:7px;">
-                    Selected package
-                </div>
-                <div style="color:#F8FAFC; font-size:1.02rem; font-weight:950; margin-bottom:7px;">
-                    {selected_strategy}
-                </div>
-                <div style="color:#E2E8F0; font-size:0.84rem; line-height:1.36; margin-bottom:9px;">
-                    {STRATEGY_DESCRIPTIONS[selected_strategy]}
-                </div>
-                <div style="color:#CBD5E1; font-size:0.76rem; line-height:1.35;">
-                    {selected_package_text}
-                </div>
-            </div>
-            """
-        )
-
-    # -------------------------------------------------------------------------
-    # COLUMN 2 — ALLOCATION TABLE
-    # -------------------------------------------------------------------------
-
-    with package_col:
-        st.markdown("### 2 · Build")
-        st.markdown(
-            "<div class='p3-section-hint'>Adjust the <b>New</b> package in ±5% steps. <b>Country</b> is the current profile; <b>Last</b> is the last executed run.</div>",
-            unsafe_allow_html=True,
-        )
-
-        st.html(
-            """
-            <div class="p3-allocation-card">
-                <div style="color:#F8FAFC; font-size:1rem; font-weight:900; margin-bottom:4px;">Strategy Allocation Table</div>
-                <div style="color:#CBD5E1; font-size:0.84rem; line-height:1.34; margin-bottom:4px;">
-                    <b>Country</b> = current investment profile · <b>Last</b> = last executed strategy · <b>New</b> = draft waiting for Run.
-                </div>
-            </div>
-            """
-        )
-
-        header_cols = st.columns([1.42, 0.60, 0.60, 1.60, 0.72])
-        headers = ["Priority", "Country", "Last", "New", "Δ vs Country"]
-        for col, header in zip(header_cols, headers):
-            col.markdown(f"<span class='p3-nowrap'><b>{header}</b></span>", unsafe_allow_html=True)
-
-        for slider_name in SLIDER_NAMES:
-            current_new_value = int(st.session_state[f"p3_slider_{slider_name}"])
-            row_cols = st.columns([1.42, 0.60, 0.60, 1.60, 0.72])
-
-            row_cols[0].markdown(
-                f"<span class='p3-nowrap' style='color:{SLIDER_COLORS[slider_name]}; font-weight:900;'>{SLIDER_SHORT_LABELS[slider_name]}</span>",
-                unsafe_allow_html=True,
-            )
-            row_cols[1].markdown(f"<span class='p3-nowrap'>{current_allocation[slider_name]}%</span>", unsafe_allow_html=True)
-            row_cols[2].markdown(f"<span class='p3-nowrap'>{st.session_state['p3_last_run_allocation'][slider_name]}%</span>", unsafe_allow_html=True)
-
-            minus_col, value_col, plus_col = row_cols[3].columns([0.48, 0.92, 0.48], gap="small")
-            if minus_col.button("−", key=f"p3_minus_{slider_name}", use_container_width=True):
-                adjust_new_allocation(slider_name, -5)
-                st.rerun()
-            value_col.markdown(
-                f"<div class='p3-stepper-value'>{current_new_value}%</div>",
-                unsafe_allow_html=True,
-            )
-            if plus_col.button("+", key=f"p3_plus_{slider_name}", use_container_width=True):
-                adjust_new_allocation(slider_name, 5)
-                st.rerun()
-
-            row_delta = current_new_value - current_allocation[slider_name]
-            delta_color = "#4ADE80" if row_delta > 0 else "#F472B6" if row_delta < 0 else "#CBD5E1"
-            row_cols[4].markdown(
-                f"<div class='p3-row-delta' style='color:{delta_color};'>{row_delta:+d}%</div>",
-                unsafe_allow_html=True,
-            )
-
-        # Re-read after controls.
+        # Free allocation input: do not constrain while editing.
+        # The learning point is that the strategy package must total exactly 100% before it can run.
         new_allocation = {
             slider_name: int(st.session_state[f"p3_slider_{slider_name}"])
             for slider_name in SLIDER_NAMES
         }
         total_allocation = sum(new_allocation.values())
-
-        if total_allocation == 100:
-            st.success("✓ New allocation totals 100%. This package can be tested.")
-        elif total_allocation < 100:
-            st.warning(f"New allocation totals {total_allocation}%. Add {100 - total_allocation}% before running.")
-        else:
-            st.error(f"New allocation totals {total_allocation}%. Reduce {total_allocation - 100}% before running.")
-
-    # -------------------------------------------------------------------------
-    # COLUMN 3 — EXECUTION CONTROLS
-    # -------------------------------------------------------------------------
-
-    with controls_col:
-        st.markdown("### 3 · Run")
-        st.markdown(
-            "<div class='p3-section-hint'>Use helper actions, then run only when New totals 100%.</div>",
-            unsafe_allow_html=True,
-        )
-
-        if st.button("Load Current", key="p3_load_current", use_container_width=True):
-            reset_to_country_baseline()
-            st.rerun()
-
-        if st.button("Load Package", key="p3_load_mission", use_container_width=True):
-            apply_strategy_preset(st.session_state["p3_selected_strategy"])
-            st.rerun()
-
-        if st.button("Load Last", key="p3_load_last_run", use_container_width=True):
-            load_last_run_allocation()
-            st.rerun()
-
-        if st.button("Clear", key="p3_clear_new", use_container_width=True):
-            clear_new_allocation()
-            st.rerun()
-
-        st.html("<div style='height:10px;'></div>")
-
-        if st.button("↺ Reset Draft", key="p3_reset_draft", use_container_width=True):
-            reset_to_country_baseline()
-            st.rerun()
+        mission_allocation = STRATEGY_PRESETS[st.session_state["p3_selected_strategy"]]
 
         st.html(
             """
             <div style="
-                height:1px;
-                background:rgba(148,163,184,0.20);
-                margin:14px 0;
-            "></div>
+                border:1px solid rgba(56,189,248,0.28);
+                border-radius:16px;
+                padding:12px 16px;
+                background:rgba(15,23,42,0.72);
+                margin-bottom:16px;
+            ">
+                <div style="color:#38BDF8; font-size:0.74rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; margin-bottom:5px;">
+                    How this workspace works
+                </div>
+                <div style="color:#E2E8F0; font-size:0.98rem; line-height:1.45; font-weight:700;">
+                    <b>1 Choose</b> a package → <b>2 Edit</b> the New allocation → <b>3 Run</b> the strategy test → <b>4 Observe</b> the latest result.
+                    The country column is the baseline; Last is the executed strategy; New is the draft waiting for Run.
+                </div>
+            </div>
             """
         )
 
-        if total_allocation == 100:
-            st.html(
-                """
-                <div class="p3-run-ready-note" style="background:rgba(20,83,45,0.36); color:#BBF7D0; border-color:rgba(74,222,128,0.36);">
-                    ✓ Ready: New package totals 100%.
-                </div>
-                """
-            )
-        elif total_allocation < 100:
-            st.html(
-                f"""
-                <div class="p3-run-ready-note" style="background:rgba(120,53,15,0.30); color:#FDE68A; border-color:rgba(245,158,11,0.42);">
-                    Add {100 - total_allocation}% before running.
-                </div>
-                """
-            )
-        else:
-            st.html(
-                f"""
-                <div class="p3-run-ready-note" style="background:rgba(127,29,29,0.30); color:#FECACA; border-color:rgba(239,68,68,0.42);">
-                    Reduce {total_allocation - 100}% before running.
-                </div>
-                """
-            )
-
-        run_clicked = st.button(
-            "▶ RUN STRATEGY TEST",
-            key="p3_run_strategy",
-            use_container_width=True,
-            disabled=(total_allocation != 100),
+        strategy_col, package_col, controls_col, result_col = st.columns(
+            [1.0, 1.95, 0.78, 1.82],
+            gap="medium",
         )
 
-        if run_clicked:
-            st.session_state["p3_last_run_allocation"] = new_allocation.copy()
-            run_dimensions, _ = calculate_dimension_after(
-                baseline_dimensions=baseline_dimensions,
-                baseline_allocation=current_allocation,
-                proposed_allocation=new_allocation,
-                family=selected_family,
-                family_weights=DATA["family_weights"],
-            )
-            run_outputs = calculate_outputs(run_dimensions)
-            run_gain_name, run_gain_delta, run_cost_name, run_cost_delta, _ = get_largest_gain_cost(current_outputs, run_outputs)
-            run_evidence = get_evidence_summary(DATA["response_matrix"], new_allocation, current_allocation)
-            run_confidence_score, run_confidence_label, _ = get_evidence_confidence(DATA["response_matrix"], new_allocation, current_allocation)
+        # -------------------------------------------------------------------------
+        # COLUMN 1 — PREDEFINED STRATEGY PACKAGES
+        # -------------------------------------------------------------------------
 
-            mission_entry = {
-                "step": 3,
-                "page": "P3 Strategic Choices",
-                "country": selected_country,
-                "strategy": st.session_state["p3_selected_strategy"],
-                "allocation": allocation_to_text(new_allocation),
-                "largest_gain": f"{run_gain_name} ({run_gain_delta:+.1f})",
-                "largest_cost": f"{run_cost_name} ({run_cost_delta:+.1f})",
-                "evidence": f"{run_confidence_score}/100 ({run_confidence_label})",
-                "family_context": selected_family,
-                "learning": f"Largest gain: {run_gain_name}. Main tradeoff/pressure: {run_cost_name}.",
-                "next_step": "Challenge Strategy",
+        with strategy_col:
+            st.markdown("### 1 · Choose")
+            st.html(
+                """
+                <div class="p3-choice-help">
+                    <div class="p3-choice-help-title">Predefined packages</div>
+                    <div class="p3-choice-help-text">
+                        Choose one starting package. It loads the <b>New</b> draft. You can still adjust every priority before Run.
+                    </div>
+                </div>
+                """
+            )
+
+            for strategy_name in STRATEGY_PRESETS.keys():
+                selected = st.session_state["p3_selected_strategy"] == strategy_name
+                label = f"✓ {strategy_name}" if selected else strategy_name
+
+                # The button is the selection object. No duplicate card under each button.
+                if st.button(
+                    label,
+                    key=f"p3_strategy_button_{strategy_name}",
+                    use_container_width=True,
+                ):
+                    apply_strategy_preset(strategy_name)
+                    st.rerun()
+
+            selected_strategy = st.session_state["p3_selected_strategy"]
+            selected_color = STRATEGY_COLORS[selected_strategy]
+            selected_package_text = allocation_to_text(STRATEGY_PRESETS[selected_strategy])
+
+            st.html(
+                f"""
+                <div style="
+                    margin-top:14px;
+                    border:1px solid {selected_color};
+                    border-left:5px solid {selected_color};
+                    border-radius:14px;
+                    padding:14px 15px;
+                    background:rgba(15,23,42,0.82);
+                    box-shadow:0 0 18px {selected_color}33;
+                ">
+                    <div style="color:{selected_color}; font-size:0.72rem; font-weight:900; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:7px;">
+                        Selected package
+                    </div>
+                    <div style="color:#F8FAFC; font-size:1.02rem; font-weight:950; margin-bottom:7px;">
+                        {selected_strategy}
+                    </div>
+                    <div style="color:#E2E8F0; font-size:0.84rem; line-height:1.36; margin-bottom:9px;">
+                        {STRATEGY_DESCRIPTIONS[selected_strategy]}
+                    </div>
+                    <div style="color:#CBD5E1; font-size:0.76rem; line-height:1.35;">
+                        {selected_package_text}
+                    </div>
+                </div>
+                """
+            )
+
+        # -------------------------------------------------------------------------
+        # COLUMN 2 — ALLOCATION TABLE
+        # -------------------------------------------------------------------------
+
+        with package_col:
+            st.markdown("### 2 · Build")
+            st.markdown(
+                "<div class='p3-section-hint'>Adjust the <b>New</b> package in ±5% steps. <b>Country</b> is the current profile; <b>Last</b> is the last executed run.</div>",
+                unsafe_allow_html=True,
+            )
+
+            st.html(
+                """
+                <div class="p3-allocation-card">
+                    <div style="color:#F8FAFC; font-size:1rem; font-weight:900; margin-bottom:4px;">Strategy Allocation Table</div>
+                    <div style="color:#CBD5E1; font-size:0.84rem; line-height:1.34; margin-bottom:4px;">
+                        <b>Country</b> = current investment profile · <b>Last</b> = last executed strategy · <b>New</b> = draft waiting for Run.
+                    </div>
+                </div>
+                """
+            )
+
+            header_cols = st.columns([1.42, 0.60, 0.60, 1.60, 0.72])
+            headers = ["Priority", "Country", "Last", "New", "Δ vs Country"]
+            for col, header in zip(header_cols, headers):
+                col.markdown(f"<span class='p3-nowrap'><b>{header}</b></span>", unsafe_allow_html=True)
+
+            for slider_name in SLIDER_NAMES:
+                current_new_value = int(st.session_state[f"p3_slider_{slider_name}"])
+                row_cols = st.columns([1.42, 0.60, 0.60, 1.60, 0.72])
+
+                row_cols[0].markdown(
+                    f"<span class='p3-nowrap' style='color:{SLIDER_COLORS[slider_name]}; font-weight:900;'>{SLIDER_SHORT_LABELS[slider_name]}</span>",
+                    unsafe_allow_html=True,
+                )
+                row_cols[1].markdown(f"<span class='p3-nowrap'>{current_allocation[slider_name]}%</span>", unsafe_allow_html=True)
+                row_cols[2].markdown(f"<span class='p3-nowrap'>{st.session_state['p3_last_run_allocation'][slider_name]}%</span>", unsafe_allow_html=True)
+
+                minus_col, value_col, plus_col = row_cols[3].columns([0.48, 0.92, 0.48], gap="small")
+                if minus_col.button("−", key=f"p3_minus_{slider_name}", use_container_width=True):
+                    adjust_new_allocation(slider_name, -5)
+                    st.rerun()
+                value_col.markdown(
+                    f"<div class='p3-stepper-value'>{current_new_value}%</div>",
+                    unsafe_allow_html=True,
+                )
+                if plus_col.button("+", key=f"p3_plus_{slider_name}", use_container_width=True):
+                    adjust_new_allocation(slider_name, 5)
+                    st.rerun()
+
+                row_delta = current_new_value - current_allocation[slider_name]
+                delta_color = "#4ADE80" if row_delta > 0 else "#F472B6" if row_delta < 0 else "#CBD5E1"
+                row_cols[4].markdown(
+                    f"<div class='p3-row-delta' style='color:{delta_color};'>{row_delta:+d}%</div>",
+                    unsafe_allow_html=True,
+                )
+
+            # Re-read after controls.
+            new_allocation = {
+                slider_name: int(st.session_state[f"p3_slider_{slider_name}"])
+                for slider_name in SLIDER_NAMES
             }
-            st.session_state["p3_mission_log"].append(mission_entry)
-            st.session_state["p3_has_run"] = True
-            st.rerun()
+            total_allocation = sum(new_allocation.values())
 
-    # -------------------------------------------------------------------------
-    # COLUMN 4 — STRATEGY TEST RESULTS TABLE
-    # -------------------------------------------------------------------------
+            if total_allocation == 100:
+                st.success("✓ New allocation totals 100%. This package can be tested.")
+            elif total_allocation < 100:
+                st.warning(f"New allocation totals {total_allocation}%. Add {100 - total_allocation}% before running.")
+            else:
+                st.error(f"New allocation totals {total_allocation}%. Reduce {total_allocation - 100}% before running.")
 
-    with result_col:
-        st.markdown("### 4 · What Happened?")
-        if st.session_state["p3_has_run"]:
+        # -------------------------------------------------------------------------
+        # COLUMN 3 — EXECUTION CONTROLS
+        # -------------------------------------------------------------------------
+
+        with controls_col:
+            st.markdown("### 3 · Run")
             st.markdown(
-                "<div class='p3-section-hint'>The table shows the last executed strategy test against the baseline.</div>",
+                "<div class='p3-section-hint'>Use helper actions, then run only when New totals 100%.</div>",
                 unsafe_allow_html=True,
             )
-        else:
-            st.markdown(
-                "<div class='p3-section-hint'>No strategy has been run yet. The table shows baseline vs baseline until the first test.</div>",
-                unsafe_allow_html=True,
+
+            if st.button("Load Current", key="p3_load_current", use_container_width=True):
+                reset_to_country_baseline()
+                st.rerun()
+
+            if st.button("Load Package", key="p3_load_mission", use_container_width=True):
+                apply_strategy_preset(st.session_state["p3_selected_strategy"])
+                st.rerun()
+
+            if st.button("Load Last", key="p3_load_last_run", use_container_width=True):
+                load_last_run_allocation()
+                st.rerun()
+
+            st.html("<div style='height:10px;'></div>")
+
+            if st.button("↺ Reset Workspace", key="p3_reset_workspace", use_container_width=True):
+                reset_p3_workspace()
+                st.rerun()
+
+            st.html(
+                """
+                <div style="
+                    height:1px;
+                    background:rgba(148,163,184,0.20);
+                    margin:14px 0;
+                "></div>
+                """
             )
 
-        render_strategy_test_results_table(
-            last_outputs=current_outputs,
-            test_outputs=last_run_outputs,
-            gain_name=gain_name,
-            gain_delta=gain_delta,
-            cost_name=cost_name,
-            cost_delta=cost_delta,
-            confidence_score=evidence_confidence_score,
-            confidence_label=evidence_confidence_label,
-        )
+            if total_allocation == 100:
+                st.html(
+                    """
+                    <div class="p3-run-ready-note" style="background:rgba(20,83,45,0.36); color:#BBF7D0; border-color:rgba(74,222,128,0.36);">
+                        ✓ Ready: New package totals 100%.
+                    </div>
+                    """
+                )
+            elif total_allocation < 100:
+                st.html(
+                    f"""
+                    <div class="p3-run-ready-note" style="background:rgba(120,53,15,0.30); color:#FDE68A; border-color:rgba(245,158,11,0.42);">
+                        Add {100 - total_allocation}% before running.
+                    </div>
+                    """
+                )
+            else:
+                st.html(
+                    f"""
+                    <div class="p3-run-ready-note" style="background:rgba(127,29,29,0.30); color:#FECACA; border-color:rgba(239,68,68,0.42);">
+                        Reduce {total_allocation - 100}% before running.
+                    </div>
+                    """
+                )
+
+            run_clicked = st.button(
+                "▶ RUN STRATEGY TEST",
+                key="p3_run_strategy",
+                use_container_width=True,
+                disabled=(total_allocation != 100),
+            )
+
+            if run_clicked:
+                st.session_state["p3_last_run_allocation"] = new_allocation.copy()
+                st.session_state["p3_last_run_strategy"] = st.session_state["p3_selected_strategy"]
+                run_dimensions, _ = calculate_dimension_after(
+                    baseline_dimensions=baseline_dimensions,
+                    baseline_allocation=current_allocation,
+                    proposed_allocation=new_allocation,
+                    family=selected_family,
+                    family_weights=DATA["family_weights"],
+                )
+                run_outputs = calculate_outputs(run_dimensions)
+                run_gain_name, run_gain_delta, run_cost_name, run_cost_delta, _ = get_largest_gain_cost(current_outputs, run_outputs)
+                run_evidence = get_evidence_summary(DATA["response_matrix"], new_allocation, current_allocation)
+                run_confidence_score, run_confidence_label, _ = get_evidence_confidence(DATA["response_matrix"], new_allocation, current_allocation)
+
+                mission_entry = {
+                    "step": 3,
+                    "page": "P3 Invest & Strategy",
+                    "country": selected_country,
+                    "strategy": st.session_state["p3_selected_strategy"],
+                    "allocation": allocation_to_text(new_allocation),
+                    "largest_gain": f"{run_gain_name} ({run_gain_delta:+.1f})",
+                    "largest_cost": f"{run_cost_name} ({run_cost_delta:+.1f})",
+                    "evidence": f"{run_confidence_score}/100 ({run_confidence_label})",
+                    "family_context": selected_family,
+                    "learning": f"Largest gain: {run_gain_name}. Main tradeoff/pressure: {run_cost_name}.",
+                    "next_step": "Challenge Strategy",
+                }
+                st.session_state["p3_mission_log"].append(mission_entry)
+
+                add_journey_event(
+                    page="P3 Invest & Strategy",
+                    action_type="strategy test",
+                    country=selected_country,
+                    reference=(
+                        f"Another Country: {reference_country}"
+                        if selected_reference == "Another Country" and reference_country
+                        else selected_reference
+                    ),
+                    topic=st.session_state["p3_selected_strategy"],
+                    observation=(
+                        f"Input allocation: {allocation_to_text(new_allocation)}. "
+                        f"Output result: largest gain = {run_gain_name} ({run_gain_delta:+.1f}); "
+                        f"main cost/pressure = {run_cost_name} ({run_cost_delta:+.1f}); "
+                        f"evidence = {run_confidence_score}/100 ({run_confidence_label})."
+                    ),
+                    evidence=f"{run_confidence_score}/100 ({run_confidence_label})",
+                    confidence=run_confidence_label,
+                    family_context=selected_family,
+                    next_step="Open Challenge Mode",
+                    dedupe_key=(
+                        f"p3_strategy::{selected_country}::"
+                        f"{st.session_state['p3_selected_strategy']}::"
+                        f"{allocation_to_text(new_allocation)}"
+                    ),
+                )
+
+                st.session_state["p3_has_run"] = True
+                st.rerun()
+
+        # -------------------------------------------------------------------------
+        # COLUMN 4 — STRATEGY TEST RESULTS TABLE
+        # -------------------------------------------------------------------------
+
+        with result_col:
+            st.markdown("### 4 · What Happened?")
+            if st.session_state["p3_has_run"]:
+                st.markdown(
+                    "<div class='p3-section-hint'>The table shows the last executed strategy test against the baseline.</div>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    "<div class='p3-section-hint'>No strategy has been run yet. The table shows baseline vs baseline until the first test.</div>",
+                    unsafe_allow_html=True,
+                )
+
+            render_strategy_test_results_table(
+                last_outputs=current_outputs,
+                test_outputs=last_run_outputs,
+                gain_name=gain_name,
+                gain_delta=gain_delta,
+                cost_name=cost_name,
+                cost_delta=cost_delta,
+                confidence_score=evidence_confidence_score,
+                confidence_label=evidence_confidence_label,
+            )
 
     # =========================================================================
     # SECTION 04 — CONSEQUENCE SUMMARY
@@ -1814,31 +2027,31 @@ with main_col:
 
     summary_cols = st.columns(3, gap="medium")
     with summary_cols[0]:
-        render_atlas_card(
+        render_p3_result_card(
             title="Current Country Baseline",
             value=selected_country,
-            delta_text=allocation_to_text(current_allocation),
+            detail=allocation_to_text(current_allocation),
             status="Country spending mix normalized to the five strategy levers.",
-            delta_color="#38BDF8",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent="#38BDF8",
         )
     with summary_cols[1]:
-        render_atlas_card(
+        last_strategy_label = st.session_state.get("p3_last_run_strategy", "No run yet") if st.session_state["p3_has_run"] else "No run yet"
+        last_strategy_accent = "#F59E0B" if st.session_state["p3_has_run"] else "#94A3B8"
+        render_p3_result_card(
             title="Last Executed Strategy",
-            value=st.session_state["p3_selected_strategy"] if st.session_state["p3_has_run"] else "No run yet",
-            delta_text=allocation_to_text(st.session_state["p3_last_run_allocation"]),
-            status="Executed strategy currently shown in the results table above.",
-            delta_color="#F59E0B",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            value=last_strategy_label,
+            detail=allocation_to_text(st.session_state["p3_last_run_allocation"]),
+            status="Executed strategy currently shown in the results table above." if st.session_state["p3_has_run"] else "No test has been run for the current selected strategy.",
+            accent=last_strategy_accent,
         )
     with summary_cols[2]:
-        render_atlas_card(
+        waiting_accent = "#A3E635" if total_allocation == 100 else "#F472B6"
+        render_p3_result_card(
             title="New Allocation Waiting",
             value=f"{total_allocation}%",
-            delta_text=allocation_to_text(new_allocation),
-            status="Editable package waiting for Run Strategy Test.",
-            delta_color="#A3E635" if total_allocation == 100 else "#F472B6",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            detail=allocation_to_text(new_allocation),
+            status="Ready for Run Strategy Test." if total_allocation == 100 else "Adjust until the package totals 100%.",
+            accent=waiting_accent,
         )
 
     # SECTION 05 — LEARN
@@ -1852,31 +2065,31 @@ with main_col:
 
     learn_cols = st.columns(3, gap="medium")
     with learn_cols[0]:
-        render_atlas_card(
+        gain_accent = get_delta_color_by_value(gain_delta, gain_name)
+        render_p3_result_card(
             title="Largest Gain",
             value=gain_name,
-            delta_text=f"{gain_delta:+.1f} after last run",
+            detail=f"{gain_delta:+.1f} after last run",
             status="Primary positive movement.",
-            delta_color="#4ADE80",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=gain_accent,
         )
     with learn_cols[1]:
-        render_atlas_card(
+        cost_accent = get_delta_color_by_value(cost_delta, cost_name)
+        render_p3_result_card(
             title="Largest Cost / Pressure",
             value=cost_name,
-            delta_text=f"{cost_delta:+.1f} after last run",
+            detail=f"{cost_delta:+.1f} after last run",
             status="Main tradeoff or pressure point.",
-            delta_color="#F472B6",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=cost_accent,
         )
     with learn_cols[2]:
-        render_atlas_card(
+        evidence_accent = "#4ADE80" if evidence_confidence_score >= 75 else "#EAB308" if evidence_confidence_score >= 55 else "#F59E0B" if evidence_confidence_score >= 35 else "#F472B6"
+        render_p3_result_card(
             title="Evidence Confidence",
             value=f"{evidence_confidence_score} / 100",
-            delta_text=evidence_confidence_label,
+            detail=evidence_confidence_label,
             status=evidence_confidence_text,
-            delta_color="#38BDF8",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=evidence_accent,
         )
 
     render_ai_insight_panel(
@@ -1980,29 +2193,12 @@ st.html(
     """
     <div style="border:1px solid rgba(56,189,248,0.30); border-radius:14px; background:rgba(30,58,95,0.55); padding:12px 16px; margin-bottom:10px;">
         <div style="color:#38BDF8; font-size:0.76rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; margin-bottom:4px;">Journey Log</div>
-        <div style="color:#E2E8F0; font-size:0.92rem; line-height:1.4;">Full-width record of strategy tests created during this page.</div>
+        <div style="color:#E2E8F0; font-size:0.92rem; line-height:1.4;">Shared record from P1 onward. Latest actions first; full details remain stored for P5/export.</div>
     </div>
     """
 )
 
-if st.session_state["p3_mission_log"]:
-    mission_log_df = pd.DataFrame(st.session_state["p3_mission_log"])
-else:
-    mission_log_df = pd.DataFrame([
-        {
-            "step": 3,
-            "page": "P3 Strategic Choices",
-            "country": selected_country,
-            "strategy": "No run yet",
-            "allocation": allocation_to_text(new_allocation),
-            "largest_gain": gain_name,
-            "largest_cost": cost_name,
-            "evidence": f"{evidence_confidence_score}/100 ({evidence_confidence_label})",
-            "family_context": selected_family,
-            "learning": "Run a strategy test to create the first mission entry.",
-            "next_step": "Run Strategy Test",
-        }
-    ])
+mission_log_df = get_journey_log_df()
 
 with st.expander("View Full Journey Log", expanded=False):
     render_journey_log_html(mission_log_df)

@@ -1,10 +1,10 @@
 """
-p4_challenge_v08_apply_shock_commit_fix.py
+p4_challenge_v14_final_visual_alignment.py
 
-European Strategy Atlas — Page 4
+EUROPEAN STRATEGY ATLAS — Page 4
 Challenge Mode / Shock + Recovery Test Room
 
-VERSION: v08_APPLY_SHOCK_COMMIT_FIX
+VERSION: v12_P4_CSS_ORDER_SAFE_FIX
 
 Architecture:
 01 Explain challenge mode
@@ -28,6 +28,15 @@ import streamlit as st
 from components.typography import render_section_title
 from components.cards import render_atlas_card, render_ai_insight_panel
 from components.page_frame import render_left_rail_placeholder, render_footer
+
+from utils.atlas_state import (
+    init_atlas_state,
+    update_atlas_context,
+    add_journey_event,
+    get_journey_log_df,
+)
+from utils.journey_progress import render_journey_progress
+
 
 
 # =============================================================================
@@ -102,11 +111,17 @@ st.html(
         font-weight:800;
     }
     .p4-panel {
-        border:1px solid rgba(245,158,11,0.36);
+        border:1px solid rgba(56,189,248,0.34);
         border-radius:16px;
         padding:15px 16px;
         background:rgba(15,23,42,0.74);
         min-height:100px;
+        box-shadow:0 0 18px rgba(56,189,248,0.05);
+    }
+    .p4-process-panel {
+        border:1px solid rgba(245,158,11,0.42) !important;
+        background:rgba(15,23,42,0.74) !important;
+        box-shadow:0 0 18px rgba(245,158,11,0.06) !important;
     }
     .p4-panel-muted {
         border:1px solid rgba(100,116,139,0.28);
@@ -117,7 +132,7 @@ st.html(
         margin-top:12px;
     }
     .p4-small-label {
-        color:#F59E0B;
+        color:#38BDF8;
         font-size:0.69rem;
         font-weight:950;
         letter-spacing:0.11em;
@@ -161,11 +176,11 @@ st.html(
         color:#FDE68A;
     }
     .p4-table-card {
-        border:1px solid rgba(245,158,11,0.42);
+        border:1px solid rgba(56,189,248,0.34);
         border-radius:16px;
         padding:15px 16px;
         background:rgba(15,23,42,0.78);
-        box-shadow:0 0 22px rgba(245,158,11,0.08);
+        box-shadow:0 0 22px rgba(56,189,248,0.08);
         margin: 0 0 12px 0;
     }
     .p4-table-title {
@@ -188,8 +203,8 @@ st.html(
         font-size:0.83rem;
     }
     .p4-table th {
-        color:#FBBF24;
-        background:rgba(120,53,15,0.28);
+        color:#38BDF8;
+        background:rgba(56,189,248,0.14);
         font-size:0.66rem;
         font-weight:950;
         letter-spacing:0.07em;
@@ -329,7 +344,237 @@ st.html(
     .p4-results-table-wide td {
         padding:8px 5px;
     }
-    </style>
+    .p4-process-panel .p4-small-label,
+    .p4-workspace-help .p4-help-title,
+    .p4-run-ready-note .p4-small-label {
+        color:#F59E0B !important;
+    }
+    .p4-current-response-grid {
+        display:grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap:10px;
+        margin-top:10px;
+    }
+    .p4-current-response-item {
+        border:1px solid rgba(148,163,184,0.18);
+        border-radius:11px;
+        background:rgba(2,6,23,0.28);
+        padding:9px 10px;
+        min-height:58px;
+    }
+    .p4-current-response-name {
+        font-size:0.72rem;
+        font-weight:950;
+        line-height:1.18;
+        margin-bottom:6px;
+    }
+    .p4-current-response-value {
+        color:#F8FAFC;
+        font-size:1.02rem;
+        font-weight:950;
+        font-family:'IBM Plex Mono','Roboto Mono',monospace;
+    }
+    .p4-current-response-total {
+        margin-top:10px;
+        display:flex;
+        justify-content:flex-end;
+        gap:10px;
+        color:#CBD5E1;
+        font-weight:900;
+    }
+    
+    /* P4 v13: CTA and disabled button polish. Keep current version buttons blue; future actions clearly muted. */
+    [class*="st-key-p4_cta_compare"] button,
+    [class*="st-key-p4_cta_families"] button {
+        background: rgba(30, 41, 59, 0.72) !important;
+        color: #94A3B8 !important;
+        border: 1px solid rgba(148, 163, 184, 0.28) !important;
+        box-shadow: none !important;
+        opacity: 0.72 !important;
+    }
+    [class*="st-key-p4_cta_adjust"] button,
+    [class*="st-key-p4_cta_reflect"] button {
+        background: linear-gradient(180deg, #38BDF8, #2563EB) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(125, 211, 252, 0.80) !important;
+        box-shadow: 0 0 14px rgba(56,189,248,0.28), 0 0 24px rgba(37,99,235,0.20) !important;
+    }
+
+
+    /* P4 v14 FINAL VISUAL ALIGNMENT
+       Match P2/P3 visual grammar: blue data panels, blue process panels, no yellow frames.
+       Feeling colors are reserved for values/deltas, not box borders. */
+    .p4-intro-box,
+    .p4-workspace-help,
+    .p4-panel,
+    .p4-process-panel,
+    .p4-table-card,
+    .p4-log-panel,
+    .p4-run-ready-note {
+        border-color: rgba(56,189,248,0.34) !important;
+        background: rgba(15,23,42,0.78) !important;
+        box-shadow: 0 0 20px rgba(56,189,248,0.06) !important;
+    }
+    .p4-intro-title,
+    .p4-help-title,
+    .p4-small-label,
+    .p4-log-title,
+    .p4-workspace-help .p4-help-title,
+    .p4-process-panel .p4-small-label,
+    .p4-run-ready-note .p4-small-label {
+        color: #38BDF8 !important;
+    }
+    .p4-run-ready-note {
+        color: #E2E8F0 !important;
+    }
+    .p4-table th {
+        color:#38BDF8 !important;
+        background:rgba(56,189,248,0.14) !important;
+    }
+    .p4-log-panel {
+        border-color: rgba(56,189,248,0.34) !important;
+    }
+    .p4-feel-card {
+        min-height:136px;
+        border-radius:16px;
+        border:1px solid rgba(56,189,248,0.34);
+        background:rgba(30,58,95,0.58);
+        padding:16px 18px;
+        box-shadow:0 0 18px rgba(56,189,248,0.08);
+    }
+    .p4-feel-card-label {
+        color:#F8FAFC;
+        font-size:0.88rem;
+        font-weight:950;
+        margin-bottom:9px;
+    }
+    .p4-feel-card-value {
+        font-family:'IBM Plex Mono','Roboto Mono',monospace;
+        font-size:1.34rem;
+        font-weight:950;
+        line-height:1.12;
+        margin-bottom:7px;
+    }
+    .p4-feel-card-detail {
+        font-size:0.90rem;
+        font-weight:950;
+        line-height:1.28;
+        margin-bottom:7px;
+    }
+    .p4-feel-card-status {
+        color:#E2E8F0;
+        font-size:0.84rem;
+        line-height:1.34;
+        font-weight:750;
+    }
+    /* CTA region: copy P3 visual feel — simple blue active buttons, muted disabled buttons. */
+    [class*="st-key-p4_cta_adjust"] button,
+    [class*="st-key-p4_cta_reflect"] button {
+        background: linear-gradient(180deg, #38BDF8, #2563EB) !important;
+        color:#FFFFFF !important;
+        border:1px solid rgba(125,211,252,0.80) !important;
+        border-radius:12px !important;
+        box-shadow:0 0 14px rgba(56,189,248,0.28), 0 0 24px rgba(37,99,235,0.20) !important;
+        font-weight:850 !important;
+    }
+    [class*="st-key-p4_cta_compare"] button,
+    [class*="st-key-p4_cta_families"] button {
+        background: rgba(30,41,59,0.72) !important;
+        color:#94A3B8 !important;
+        border:1px solid rgba(148,163,184,0.28) !important;
+        border-radius:12px !important;
+        box-shadow:none !important;
+        opacity:0.58 !important;
+        font-weight:850 !important;
+    }
+
+
+    /* P4 v15 FINAL BUTTON FIX — match P3 CTA behavior.
+       Active actions use Atlas blue. Disabled future actions are visibly muted and non-prominent. */
+    .p4-cta-card-active .atlas-gap-card,
+    .p4-cta-card-disabled .atlas-gap-card {
+        min-height: 132px !important;
+        padding: 14px 16px !important;
+    }
+    .p4-cta-card-disabled .atlas-gap-card {
+        opacity: 0.48 !important;
+        filter: grayscale(100%) !important;
+        border-color: rgba(148,163,184,0.20) !important;
+        box-shadow: none !important;
+    }
+    [class*="st-key-p4_cta_adjust"] button,
+    [class*="st-key-p4_cta_reflect"] button {
+        min-height: 44px !important;
+        height: 44px !important;
+        padding: 0.50rem 0.75rem !important;
+        font-size: 0.92rem !important;
+        line-height: 1.15 !important;
+        white-space: nowrap !important;
+        background: linear-gradient(180deg, #38BDF8, #2563EB) !important;
+        color:#FFFFFF !important;
+        border:1px solid rgba(125,211,252,0.80) !important;
+        border-radius:12px !important;
+        box-shadow:0 0 14px rgba(56,189,248,0.28), 0 0 24px rgba(37,99,235,0.20) !important;
+        font-weight:850 !important;
+    }
+    [class*="st-key-p4_cta_compare"] button,
+    [class*="st-key-p4_cta_families"] button,
+    [class*="st-key-p4_cta_another"] button:disabled,
+    [class*="st-key-p4_cta_compare"] button:disabled,
+    [class*="st-key-p4_cta_families"] button:disabled {
+        min-height: 44px !important;
+        height: 44px !important;
+        padding: 0.50rem 0.75rem !important;
+        font-size: 0.90rem !important;
+        line-height: 1.15 !important;
+        white-space: nowrap !important;
+        background: rgba(30,41,59,0.42) !important;
+        color: rgba(148,163,184,0.72) !important;
+        border: 1px solid rgba(148,163,184,0.24) !important;
+        border-radius: 12px !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+    }
+
+
+    /* P4 v17: same-page CTA link styled exactly like Atlas/P3 blue action button. */
+    .p4-inline-cta-button {
+        display:block;
+        width:100%;
+        text-align:center;
+        text-decoration:none !important;
+        background:linear-gradient(180deg, #38BDF8, #2563EB) !important;
+        color:#FFFFFF !important;
+        border:1px solid rgba(125,211,252,0.80) !important;
+        border-radius:12px !important;
+        font-weight:850 !important;
+        padding:0.75rem 1rem !important;
+        box-shadow:0 0 14px rgba(56,189,248,0.28), 0 0 24px rgba(37,99,235,0.20) !important;
+        line-height:1.15 !important;
+    }
+    .p4-inline-cta-button:hover {
+        background:linear-gradient(180deg, #67E8F9, #3B82F6) !important;
+        color:#FFFFFF !important;
+        transform:translateY(-1px);
+    }
+
+    /* P4 final polish: make Low / Medium / High feel like a clear challenge-strength card. */
+    [class*="st-key-p4_strength_radio_v08"] {
+        border:1px solid rgba(56,189,248,0.34) !important;
+        border-radius:16px !important;
+        background:rgba(15,23,42,0.78) !important;
+        padding:12px 14px !important;
+        margin:0 0 12px 0 !important;
+    }
+    [class*="st-key-p4_strength_radio_v08"] label,
+    [class*="st-key-p4_strength_radio_v08"] p {
+        color:#E2E8F0 !important;
+        font-weight:800 !important;
+    }
+
+</style>
     """
 )
 
@@ -463,6 +708,7 @@ COMING_SOON_CHALLENGES = {
 
 STRENGTH_FACTORS = {"Low": 0.50, "Medium": 0.75, "High": 1.00}
 
+# Keep one response order everywhere in P4.
 RESPONSE_AREAS = ["Environment", "Economic Affairs", "Social Protection", "Defense", "Fiscal Reserve"]
 DEFAULT_RESPONSE = {
     "Environment": 25,
@@ -649,8 +895,34 @@ def get_largest_recovery(shock_outputs: dict[str, float], response_outputs: dict
 
 
 def response_to_text(response: dict[str, int]) -> str:
-    return " | ".join(f"{k}: {v}%" for k, v in response.items())
+    return " | ".join(f"{area}: {response.get(area, 0)}%" for area in RESPONSE_AREAS)
 
+
+def render_response_package_card(response: dict[str, int], title: str = "Current Response Package"):
+    response_items = "".join(
+        f"""
+        <div class="p4-current-response-item">
+            <div class="p4-current-response-name" style="color:{RESPONSE_COLORS.get(area, '#CBD5E1')};">{area}</div>
+            <div class="p4-current-response-value">{response.get(area, 0)}%</div>
+        </div>
+        """
+        for area in RESPONSE_AREAS
+    )
+    total = sum(response.get(area, 0) for area in RESPONSE_AREAS)
+    total_color = "#4ADE80" if total == 100 else "#F59E0B"
+    st.html(
+        f"""
+        <div class="p4-panel" style="min-height:unset; margin:10px 0 16px 0;">
+            <div class="p4-small-label">{title}</div>
+            <div class="p4-panel-text">Response allocation currently waiting for the recovery test.</div>
+            <div class="p4-current-response-grid">{response_items}</div>
+            <div class="p4-current-response-total">
+                <span>Total</span>
+                <span style="color:{total_color}; font-family:'IBM Plex Mono','Roboto Mono',monospace;">{total}%</span>
+            </div>
+        </div>
+        """
+    )
 
 def response_modified(response: dict[str, int]) -> bool:
     return any(response[k] != DEFAULT_RESPONSE[k] for k in RESPONSE_AREAS)
@@ -712,21 +984,24 @@ def render_coming_soon_panel():
     )
 
 
-def render_dimension_damage_table(current_dimensions: dict[str, float], shock_dimensions: dict[str, float]):
+def render_dimension_damage_table(current_outputs: dict[str, float], shock_outputs: dict[str, float]):
+    """Render Section 02 using the same output names/order as P3/P4 recovery results."""
     rows = []
-    for dim in DISPLAY_DIMENSIONS:
-        current = current_dimensions.get(dim, 50)
-        shock = shock_dimensions.get(dim, 50)
+    for output_name in OUTPUT_REGISTRY.keys():
+        current = current_outputs.get(output_name, 50)
+        shock = shock_outputs.get(output_name, 50)
         delta = shock - current
-        accent = get_delta_color(delta)
+        accent = get_delta_color(delta, output_name)
         arrow = "▲" if delta > 1 else "▼" if delta < -1 else "→"
+        reading = get_reading(delta, output_name)
         rows.append(
             f"""
             <tr>
-                <td><span class="p4-name">{dim}</span></td>
+                <td><span class="p4-name">{output_name}</span></td>
                 <td><span class="p4-score">{current:.0f}</span></td>
                 <td><span class="p4-score">{shock:.0f}</span></td>
                 <td><span class="p4-delta" style="color:{accent};">{arrow} {delta:+.1f}</span></td>
+                <td><span class="p4-reading" style="color:{accent};">{reading}</span></td>
             </tr>
             """
         )
@@ -735,11 +1010,17 @@ def render_dimension_damage_table(current_dimensions: dict[str, float], shock_di
         <div class="p4-table-card">
             <div class="p4-table-title">Shock Impact</div>
             <div class="p4-table-subtitle">
-                <b>Current</b> = selected strategy state · <b>Shock</b> = challenge-adjusted state.
+                <b>Current</b> = selected strategy output before shock · <b>Shock</b> = disrupted output state.
             </div>
-            <table class="p4-table">
-                <colgroup><col style="width:42%;"><col style="width:17%;"><col style="width:17%;"><col style="width:24%;"></colgroup>
-                <thead><tr><th>Dimension</th><th>Current</th><th>Shock</th><th>Δ</th></tr></thead>
+            <table class="p4-table p4-results-table-wide">
+                <colgroup>
+                    <col style="width:32%;">
+                    <col style="width:14%;">
+                    <col style="width:14%;">
+                    <col style="width:16%;">
+                    <col style="width:24%;">
+                </colgroup>
+                <thead><tr><th>Output</th><th>Current</th><th>Shock</th><th>Δ</th><th>Reading</th></tr></thead>
                 <tbody>{''.join(rows)}</tbody>
             </table>
         </div>
@@ -912,39 +1193,49 @@ def render_recovery_output_table(current_outputs: dict[str, float], shock_output
     )
 
 
+
+def render_p4_feel_card(title: str, value: str, detail: str, status: str, accent: str):
+    """P4 section-04 card aligned with P3: blue frame, feeling color on value/detail."""
+    st.html(
+        f"""
+        <div class="p4-feel-card">
+            <div class="p4-feel-card-label">{title}</div>
+            <div class="p4-feel-card-value" style="color:{accent};">{value}</div>
+            <div class="p4-feel-card-detail" style="color:{accent};">{detail}</div>
+            <div class="p4-feel-card-status">{status}</div>
+        </div>
+        """
+    )
+
 def render_shock_summary_cards(damage_name: str, damage_delta: float, shock_resilience: float):
     damage_color = get_delta_color(damage_delta, damage_name)
     shock_label = classify_resilience(shock_resilience)
     shock_color = "#4ADE80" if shock_resilience >= 70 else "#FBBF24" if shock_resilience >= 55 else "#F97316" if shock_resilience >= 40 else "#F472B6"
     cols = st.columns(3, gap="medium")
     with cols[0]:
-        render_atlas_card(
+        render_p4_feel_card(
             title="Largest Damage",
             value=damage_name,
-            delta_text=f"{damage_delta:+.1f} after shock",
+            detail=f"{damage_delta:+.1f} after shock",
             status="Largest movement caused by the challenge.",
-            delta_color=damage_color,
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=damage_color,
         )
     with cols[1]:
-        render_atlas_card(
+        render_p4_feel_card(
             title="Main Vulnerability",
             value=damage_name,
-            delta_text="Shock exposure",
+            detail="Shock exposure",
             status="Primary place where the current strategy was stressed.",
-            delta_color="#F472B6",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent="#F472B6",
         )
     with cols[2]:
-        render_atlas_card(
+        render_p4_feel_card(
             title="Shock Resilience",
             value=f"{shock_resilience:.0f} / 100",
-            delta_text=shock_label,
+            detail=shock_label,
             status="Resilience after applying the disruption, before response.",
-            delta_color=shock_color,
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=shock_color,
         )
-
 
 def render_recovery_summary_cards(recovery_name: str, recovery_delta: float, remaining_risk_name: str, final_resilience: float):
     recovery_color = get_delta_color(recovery_delta, recovery_name)
@@ -952,33 +1243,29 @@ def render_recovery_summary_cards(recovery_name: str, recovery_delta: float, rem
     final_color = "#4ADE80" if final_resilience >= 70 else "#FBBF24" if final_resilience >= 55 else "#F97316" if final_resilience >= 40 else "#F472B6"
     cols = st.columns(3, gap="medium")
     with cols[0]:
-        render_atlas_card(
+        render_p4_feel_card(
             title="Largest Recovery",
             value=recovery_name,
-            delta_text=f"{recovery_delta:+.1f} after response",
+            detail=f"{recovery_delta:+.1f} after response",
             status="Largest improvement created by the response package.",
-            delta_color=recovery_color,
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=recovery_color,
         )
     with cols[1]:
-        render_atlas_card(
+        render_p4_feel_card(
             title="Remaining Risk",
             value=remaining_risk_name,
-            delta_text="After response",
+            detail="After response",
             status="Main unresolved pressure point.",
-            delta_color="#F472B6",
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent="#F472B6",
         )
     with cols[2]:
-        render_atlas_card(
+        render_p4_feel_card(
             title="Final Resilience",
             value=f"{final_resilience:.0f} / 100",
-            delta_text=final_label,
+            detail=final_label,
             status="Resilience after shock and response.",
-            delta_color=final_color,
-            card_class="atlas-gap-card atlas-gap-card-top",
+            accent=final_color,
         )
-
 
 def render_p4_mission_log_panel(entry: dict):
     st.html(
@@ -1003,12 +1290,48 @@ def render_p4_mission_log_panel(entry: dict):
 
 
 def render_journey_log_html(log_df: pd.DataFrame):
-    display_df = log_df.copy()
-    preferred_cols = ["step", "page", "country", "challenge", "strength", "response", "largest_damage", "largest_recovery", "resilience", "learning", "next_step"]
-    display_cols = [col for col in preferred_cols if col in display_df.columns]
-    display_df = display_df[display_cols]
+    """Compact shared Atlas journey log: newest actions first, P1-P4 compatible."""
+    if log_df is None or log_df.empty:
+        display_df = pd.DataFrame(
+            columns=["Step", "Page", "Country", "Reference", "Topic", "Observation", "Next"]
+        )
+    else:
+        display_df = log_df.copy()
+        if "step" in display_df.columns:
+            display_df = display_df.sort_values("step", ascending=False)
+        display_df = display_df.head(10)
 
-    headers = "".join(f"<th>{col.replace('_', ' ')}</th>" for col in display_df.columns)
+        rename_map = {
+            "step": "Step",
+            "page": "Page",
+            "country": "Country",
+            "reference": "Reference",
+            "topic": "Topic",
+            "observation": "Observation",
+            "next_step": "Next",
+        }
+        keep_cols = [col for col in rename_map if col in display_df.columns]
+        display_df = display_df[keep_cols].rename(columns=rename_map)
+
+        for col in ["Step", "Page", "Country", "Reference", "Topic", "Observation", "Next"]:
+            if col not in display_df.columns:
+                display_df[col] = ""
+        display_df = display_df[["Step", "Page", "Country", "Reference", "Topic", "Observation", "Next"]]
+
+    column_widths = {
+        "Step": "5%",
+        "Page": "13%",
+        "Country": "9%",
+        "Reference": "12%",
+        "Topic": "18%",
+        "Observation": "34%",
+        "Next": "9%",
+    }
+    colgroup = "".join(
+        f'<col style="width:{column_widths.get(col, "10%")};">'
+        for col in display_df.columns
+    )
+    headers = "".join(f"<th>{col}</th>" for col in display_df.columns)
     rows = []
     for _, row in display_df.iterrows():
         cells = "".join(f"<td>{row[col]}</td>" for col in display_df.columns)
@@ -1016,18 +1339,58 @@ def render_journey_log_html(log_df: pd.DataFrame):
 
     st.html(
         f"""
-        <div style="width:100%; margin-top:12px; border-radius:16px; border:1px solid rgba(245,158,11,0.34); background:rgba(15,23,42,0.72); padding:16px; overflow-x:auto;">
-            <div style="color:#F8FAFC; font-size:1.05rem; font-weight:900; margin-bottom:6px;">Journey Log Table</div>
-            <div style="color:#CBD5E1; font-size:0.86rem; margin-bottom:14px;">Full-width record of P4 challenge and recovery tests. This becomes input for P5 Reflection.</div>
-            <table style="min-width:1300px; width:100%; border-collapse:collapse; table-layout:fixed; background:rgba(51,65,85,0.92); color:#F8FAFC; font-size:0.82rem;">
+        <div style="
+            width:100%;
+            margin-top:12px;
+            border-radius:16px;
+            border:1px solid rgba(245,158,11,0.34);
+            background:rgba(15,23,42,0.72);
+            padding:16px;
+            overflow-x:auto;
+        ">
+            <div style="color:#F8FAFC; font-size:1.05rem; font-weight:900; margin-bottom:6px;">
+                Journey Log
+            </div>
+            <div style="color:#CBD5E1; font-size:0.86rem; margin-bottom:14px;">
+                Latest actions first. Full details remain stored for P5/export.
+            </div>
+            <table style="
+                min-width:1200px;
+                width:100%;
+                border-collapse:collapse;
+                table-layout:fixed;
+                background:rgba(51,65,85,0.92);
+                color:#F8FAFC;
+                font-size:0.82rem;
+            ">
+                <colgroup>{colgroup}</colgroup>
                 <thead><tr>{headers}</tr></thead>
                 <tbody>{''.join(rows)}</tbody>
             </table>
         </div>
         <style>
-            table th {{ background:rgba(245,158,11,0.16); color:#FDE68A; border:1px solid rgba(148,163,184,0.40); padding:10px 9px; text-align:left; font-size:0.72rem; font-weight:900; letter-spacing:0.04em; text-transform:uppercase; }}
-            table td {{ border:1px solid rgba(148,163,184,0.32); padding:11px 9px; vertical-align:top; line-height:1.36; background:rgba(51,65,85,0.78); word-wrap:break-word; }}
-            table tbody tr:nth-child(even) td {{ background:rgba(71,85,105,0.68); }}
+            table th {{
+                background:rgba(245,158,11,0.16);
+                color:#FDE68A;
+                border:1px solid rgba(148,163,184,0.40);
+                padding:10px 9px;
+                text-align:left;
+                font-size:0.72rem;
+                font-weight:900;
+                letter-spacing:0.04em;
+                text-transform:uppercase;
+            }}
+            table td {{
+                border:1px solid rgba(148,163,184,0.32);
+                padding:11px 9px;
+                vertical-align:top;
+                line-height:1.36;
+                background:rgba(51,65,85,0.78);
+                word-wrap:break-word;
+            }}
+            table tbody tr:nth-child(even) td {{
+                background:rgba(71,85,105,0.68);
+            }}
         </style>
         """
     )
@@ -1059,9 +1422,7 @@ def adjust_response(area: str, delta: int):
 # PAGE CONFIG + STATE
 # =============================================================================
 
-st.markdown("## P4 — Challenge Mode")
-st.caption("P4 VERSION v08_APPLY_SHOCK_COMMIT_FIX · Shock and recovery outputs update only after their Run buttons.")
-st.html("<div class='p4-version'>P4 VERSION v08_APPLY_SHOCK_COMMIT_FIX</div>")
+st.markdown("## P4 — Challenge")
 
 st.session_state.setdefault("p4_selected_challenge", "Energy Crisis")
 st.session_state.setdefault("p4_strength", "Medium")
@@ -1084,10 +1445,34 @@ committed_response = st.session_state.get("p4_committed_response", DEFAULT_RESPO
 total_response = sum(draft_response.values())
 
 # =============================================================================
-# TOP CONTEXT
+# TOP CONTEXT — GLOBAL ATLAS STATE
 # =============================================================================
 
 country_options = get_country_options(DATA["country_profiles"])
+
+init_atlas_state(
+    default_country="Germany",
+    default_reference="Family Average",
+    default_reference_country="Sweden",
+    default_view_mode="Relative",
+)
+
+atlas_country = st.session_state.get("atlas_country", "Germany")
+atlas_reference_type = st.session_state.get("atlas_reference_type", "Family Average")
+atlas_reference_country = st.session_state.get("atlas_reference_country", "Sweden")
+atlas_view_mode = st.session_state.get("atlas_view_mode", "Relative")
+
+if atlas_country not in country_options:
+    atlas_country = "Germany" if "Germany" in country_options else country_options[0]
+if atlas_reference_country not in country_options:
+    atlas_reference_country = "Sweden" if "Sweden" in country_options else country_options[0]
+
+reference_options = ["EU Average", "Family Average", "Another Country"]
+if atlas_reference_type not in reference_options:
+    atlas_reference_type = "Family Average"
+view_options = ["Relative", "Absolute"]
+if atlas_view_mode not in view_options:
+    atlas_view_mode = "Relative"
 
 top_col1, top_col2, top_col3, top_col_ref_country, top_col4 = st.columns([1.8, 1.05, 1.15, 1.15, 0.9], gap="medium")
 
@@ -1108,25 +1493,61 @@ with top_col2:
     selected_country = st.selectbox(
         "Country",
         options=country_options,
-        index=country_options.index("Germany") if "Germany" in country_options else 0,
+        index=country_options.index(atlas_country),
+        key="p4_global_country_v09",
     )
 
 with top_col3:
-    selected_reference = st.selectbox("Reference", options=["EU Average", "Family Average", "Another Country"], index=1)
+    selected_reference = st.selectbox(
+        "Reference",
+        options=reference_options,
+        index=reference_options.index(atlas_reference_type),
+        key="p4_global_reference_v09",
+    )
 
 with top_col_ref_country:
     if selected_reference == "Another Country":
         reference_country = st.selectbox(
             "Reference Country",
             options=country_options,
-            index=country_options.index("Sweden") if "Sweden" in country_options else 0,
+            index=country_options.index(atlas_reference_country),
+            key="p4_global_reference_country_v09",
         )
     else:
         reference_country = None
-        st.text_input("Reference Country", value="-----------", disabled=True)
+        st.text_input("Reference Country", value="-----------", disabled=True, key="p4_reference_country_disabled_v09")
 
 with top_col4:
-    view_mode = st.radio("View Mode", options=["Relative", "Absolute"], horizontal=True, index=0)
+    view_mode = st.radio(
+        "View Mode",
+        options=view_options,
+        horizontal=True,
+        index=view_options.index(atlas_view_mode),
+        key="p4_global_view_mode_v09",
+    )
+
+update_atlas_context(
+    country=selected_country,
+    reference_type=selected_reference,
+    reference_country=reference_country if selected_reference == "Another Country" else atlas_reference_country,
+    view_mode=view_mode,
+    source_page="P4 Challenge Mode",
+    log_context_change=True,
+)
+
+reference_label = (
+    f"Another Country: {reference_country}"
+    if selected_reference == "Another Country" and reference_country
+    else selected_reference
+)
+
+p3_strategy_label = st.session_state.get("p3_last_run_strategy", "No P3 strategy run")
+p3_strategy_allocation = st.session_state.get("p3_last_run_allocation", None)
+if not st.session_state.get("p3_has_run", False):
+    p3_strategy_label = "Baseline fallback"
+    p3_strategy_caption = "No P3 run in this session"
+else:
+    p3_strategy_caption = "From last P3 strategy test"
 
 country_profile = get_country_profile(DATA["country_profiles"], selected_country)
 selected_family = country_profile.get("structural_family", "Industrial / Transition Systems") if not country_profile.empty else "Industrial / Transition Systems"
@@ -1180,8 +1601,8 @@ st.html(
         </div>
         <div class="p1-kpi-card">
             <div class="p1-kpi-label" style="color:#84CC16;">CURRENT STRATEGY</div>
-            <div class="p1-kpi-main">Selected Strategy</div>
-            <div class="p1-kpi-sub">From P3 or baseline fallback</div>
+            <div class="p1-kpi-main">{p3_strategy_label}</div>
+            <div class="p1-kpi-sub">{p3_strategy_caption}</div>
         </div>
         <div class="p1-kpi-card">
             <div class="p1-kpi-label" style="color:#F59E0B;">CHALLENGE</div>
@@ -1201,6 +1622,8 @@ st.html(
     </div>
     """
 )
+
+render_journey_progress(4)
 
 render_intro_box()
 
@@ -1227,6 +1650,8 @@ with main_col:
     # =========================================================================
     # SECTION 02 — CHALLENGE TEST
     # =========================================================================
+    st.html('<div id="p4_challenge_section_02" style="height:0; margin:0; padding:0;"></div>')
+
     render_section_title(
         number="02",
         title="What did the challenge do?",
@@ -1252,7 +1677,7 @@ with main_col:
             """
             <div class="p4-panel" style="min-height:unset;">
                 <div class="p4-small-label">Active Scenarios</div>
-                <div class="p4-panel-text">Only Energy Crisis and Pandemic Pressure are active in the MVP.</div>
+                <div class="p4-panel-text">Energy Crisis and Pandemic Pressure are active in the current version.</div>
             </div>
             """
         )
@@ -1263,7 +1688,14 @@ with main_col:
                 # Selection changes the draft shock only. Results stay committed until Apply Shock.
                 st.rerun()
 
-        st.markdown("### Strength")
+        st.html(
+            """
+            <div class="p4-panel" style="min-height:unset; margin-top:16px; margin-bottom:8px;">
+                <div class="p4-small-label">Choose Challenge Strength</div>
+                <div class="p4-panel-text">Select how strongly the disruption affects the system before applying the shock.</div>
+            </div>
+            """
+        )
         selected_strength_radio = st.radio(
             "Challenge Strength",
             options=["Low", "Medium", "High"],
@@ -1293,7 +1725,7 @@ with main_col:
         st.html("<div style='height:10px;'></div>")
         st.html(
             """
-            <div class="p4-panel" style="min-height:unset; border-color:rgba(245,158,11,0.62);">
+            <div class="p4-panel p4-process-panel" style="min-height:unset;">
                 <div class="p4-small-label">Apply Shock</div>
                 <div class="p4-panel-text">
                     Apply the selected disruption before trying to recover. This commits the shock state used in the damage table.
@@ -1317,6 +1749,20 @@ with main_col:
             st.session_state["p4_applied_strength"] = selected_strength
             st.session_state["p4_committed_response"] = DEFAULT_RESPONSE.copy()
             reset_response()
+            add_journey_event(
+                page="P4 Challenge Mode",
+                action_type="apply shock",
+                country=selected_country,
+                reference=reference_label,
+                topic=f"{selected_challenge} · {selected_strength}",
+                observation=(
+                    f"Applied {selected_strength} {selected_challenge} to {p3_strategy_label}. "
+                    "Shock result will be used as the starting point for recovery."
+                ),
+                family_context=selected_family,
+                next_step="Run recovery test",
+                dedupe_key=f"p4_shock::{selected_country}::{selected_challenge}::{selected_strength}::{p3_strategy_label}",
+            )
             st.rerun()
 
         if st.session_state["p4_has_challenge_run"]:
@@ -1333,7 +1779,7 @@ with main_col:
         st.markdown("### 3 · Observe Damage")
         if not st.session_state["p4_has_challenge_run"]:
             st.markdown(
-                "<div class='p4-section-hint'>No shock is applied yet. The table shows the current reference state until you press Apply Shock.</div>",
+                "<div class='p4-section-hint'>No shock is applied yet. The table shows current strategy outputs until you press Apply Shock.</div>",
                 unsafe_allow_html=True,
             )
         else:
@@ -1341,7 +1787,7 @@ with main_col:
                 "<div class='p4-section-hint'>This is the applied shock result. This becomes the starting point for recovery.</div>",
                 unsafe_allow_html=True,
             )
-        render_dimension_damage_table(current_dimensions, active_shock_dimensions)
+        render_dimension_damage_table(current_outputs, active_shock_outputs)
         render_shock_observation_box(shock_damage_name, shock_damage_delta, shock_resilience, applied_challenge, applied_strength)
 
     # =========================================================================
@@ -1349,8 +1795,8 @@ with main_col:
     # =========================================================================
     render_section_title(
         number="03",
-        title="Can I improve it with a response package?",
-        subtitle="Now respond to the disrupted state. This reuses the P3 table logic: adjust, run, observe correction.",
+        title=f"Build response to: {applied_challenge} — {applied_strength}",
+        subtitle="Goal: improve resilience after the selected disruption by adjusting the response package, running the recovery test, and reading what changed.",
     )
 
     st.html(
@@ -1358,7 +1804,7 @@ with main_col:
         <div class="p4-workspace-help">
             <div class="p4-help-title">Recovery Test Flow</div>
             <div class="p4-help-text">
-                1 Start from the shock result → 2 Build a response package → 3 Run recovery test → 4 Observe Shock → Response recovery.
+                1 Start from the selected shock → 2 Build response package → 3 Run recovery test → 4 Observe Shock → Response recovery.
             </div>
         </div>
         """
@@ -1368,7 +1814,7 @@ with main_col:
     with top_status_col:
         st.html(
             f"""
-            <div class="p4-panel" style="min-height:unset;">
+            <div class="p4-panel p4-process-panel" style="min-height:unset;">
                 <div class="p4-small-label">Starting Point</div>
                 <div class="p4-panel-title">{applied_challenge}</div>
                 <div class="p4-panel-text">
@@ -1381,14 +1827,18 @@ with main_col:
         )
     with top_flow_col:
         st.html("""
-            <div class="p4-panel" style="min-height:unset;">
+            <div class="p4-panel p4-process-panel" style="min-height:unset;">
                 <div class="p4-small-label">Recovery Logic</div>
                 <div class="p4-panel-text">
                     Recovery starts from the applied shock state. Build a response package, run the recovery test, then compare
-                    <b>Ref → Shock → Response Test</b> in the output table.
+                    <b>Ref → Shock → Response Test</b> in the output table.<br><br>
+                    <b>Response levers:</b> Environment supports sustainability recovery · Economic Affairs supports innovation recovery ·
+                    Social Protection supports social recovery · Defense supports security recovery · Fiscal Reserve supports fiscal recovery.
                 </div>
             </div>
         """)
+
+    render_response_package_card(draft_response, title="Current Response Package")
 
     response_col, recovery_run_col, results_col = st.columns([2.75, 0.85, 2.10], gap="medium")
 
@@ -1461,9 +1911,31 @@ with main_col:
                 "largest_recovery": f"{committed_recovery_name} ({committed_recovery_delta:+.1f})",
                 "resilience": f"{committed_final_resilience:.0f}/100 ({committed_final_label})",
                 "learning": f"Shock stressed {shock_damage_name}; response mainly improved {committed_recovery_name}.",
-                "next_step": "Reflect or test another challenge",
+                "next_step": "Reflect and learn",
             }
             st.session_state["p4_journey_log"].append(entry)
+            add_journey_event(
+                page="P4 Challenge Mode",
+                action_type="recovery test",
+                country=selected_country,
+                reference=reference_label,
+                topic=f"{applied_challenge} · {applied_strength}",
+                observation=(
+                    f"Starting strategy: {p3_strategy_label}. "
+                    f"Shock damage: {shock_damage_name} ({shock_damage_delta:+.1f}). "
+                    f"Response allocation: {response_to_text(draft_response)}. "
+                    f"Largest recovery: {committed_recovery_name} ({committed_recovery_delta:+.1f}); "
+                    f"final resilience = {committed_final_resilience:.0f}/100 ({committed_final_label})."
+                ),
+                evidence="Shock/recovery sandbox assumptions",
+                confidence="Educational simulation",
+                family_context=selected_family,
+                next_step="Reflect and learn",
+                dedupe_key=(
+                    f"p4_recovery::{selected_country}::{applied_challenge}::{applied_strength}::"
+                    f"{response_to_text(draft_response)}::{p3_strategy_label}"
+                ),
+            )
             st.rerun()
 
     with results_col:
@@ -1513,6 +1985,21 @@ with main_col:
         next_question="Would a different P3 strategy, country, or family recover differently under the same challenge?",
     )
 
+    st.html(
+        f"""
+        <div class="p4-panel" style="margin-top:14px; border-left:5px solid #A855F7; border-color:rgba(168,85,247,0.42);">
+            <div class="p4-small-label" style="color:#C084FC;">Reflection Questions</div>
+            <div class="p4-panel-text">
+                ? Which capability absorbed the shock best?<br>
+                ? Which capability remained vulnerable after the response?<br>
+                ? Did the response solve the problem or shift pressure elsewhere?<br>
+                ? Would another P3 strategy or country recover differently?
+            </div>
+        </div>
+        """
+    )
+
+
     # =========================================================================
     # SECTION 05 — CTA
     # =========================================================================
@@ -1522,70 +2009,63 @@ with main_col:
         subtitle="Continue the learning journey, revise the strategy, or test another disruption.",
     )
 
-    cta1, cta2, cta3, cta4, cta5 = st.columns(5, gap="medium")
-    with cta1:
+    cta_strategy, cta_another, cta_compare, cta_reflect = st.columns(4, gap="medium")
+
+    with cta_strategy:
         with st.container(border=True):
-            render_atlas_card(
-                title="Adjust",
-                value="Return to Strategy",
-                delta_text="Back to P3.",
-                status="Revise the starting strategy.",
-                delta_color="#38BDF8",
-                card_class="atlas-gap-card atlas-gap-card-top atlas-cta-navigation",
+            st.html(
+                """
+                <div class="atlas-cta-navigation" style="min-height:132px; padding:14px 16px;">
+                    <div style="color:#94A3B8; font-size:0.72rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase;">Back</div>
+                    <div style="color:#38BDF8; font-size:1.12rem; font-weight:900; margin:8px 0;">Strategy Builder</div>
+                    <div style="color:#CBD5E1; font-size:0.84rem; line-height:1.35;">Return to the strategy builder and revise the starting strategy.</div>
+                </div>
+                """
             )
-            if st.button("Adjust Strategy", key="p4_cta_adjust", use_container_width=True):
+            if st.button("Open Strategy Builder", key="p4_cta_adjust", use_container_width=True):
                 safe_switch_page("pages/p3_strategic_choices.py")
-    with cta2:
+
+    with cta_another:
         with st.container(border=True):
-            render_atlas_card(
-                title="Try Again",
-                value="Another Challenge",
-                delta_text="Stay on P4.",
-                status="Test another active scenario.",
-                delta_color="#F59E0B",
-                card_class="atlas-gap-card atlas-gap-card-top atlas-cta-challenge",
+            st.html(
+                """
+                <div class="atlas-cta-challenge" style="min-height:132px; padding:14px 16px;">
+                    <div style="color:#94A3B8; font-size:0.72rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase;">Try Again</div>
+                    <div style="color:#38BDF8; font-size:1.12rem; font-weight:900; margin:8px 0;">Another Challenge</div>
+                    <div style="color:#CBD5E1; font-size:0.84rem; line-height:1.35;">Jump back to Challenge setup and test another active scenario.</div>
+                </div>
+                """
             )
-            if st.button("Try Another", key="p4_cta_another", use_container_width=True):
-                st.session_state["p4_has_challenge_run"] = False
-                st.session_state["p4_has_response_run"] = False
-                st.session_state["p4_applied_challenge"] = "No Shock"
-                st.session_state["p4_applied_strength"] = "None"
-                st.session_state["p4_committed_response"] = DEFAULT_RESPONSE.copy()
-                reset_response()
-                st.rerun()
-    with cta3:
+            st.markdown(
+                '<a class="p4-inline-cta-button" href="#p4_challenge_section_02">Open Challenge Setup</a>',
+                unsafe_allow_html=True,
+            )
+
+    with cta_compare:
         with st.container(border=True):
-            render_atlas_card(
-                title="Compare",
-                value="Countries",
-                delta_text="Change exposure.",
-                status="Select another country at the top.",
-                delta_color="#22D3EE",
-                card_class="atlas-gap-card atlas-gap-card-top atlas-cta-compare",
+            st.html(
+                """
+                <div class="atlas-cta-compare" style="min-height:132px; padding:14px 16px; opacity:0.52; filter:grayscale(100%);">
+                    <div style="color:#94A3B8; font-size:0.72rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase;">Future Capability</div>
+                    <div style="color:#22D3EE; font-size:1.12rem; font-weight:900; margin:8px 0;">Country Comparison</div>
+                    <div style="color:#CBD5E1; font-size:0.84rem; line-height:1.35;">Not current version: compare country exposure and recovery later.</div>
+                </div>
+                """
             )
-            st.button("Compare", key="p4_cta_compare", use_container_width=True, disabled=True)
-    with cta4:
+            st.button("Future button", key="p4_cta_compare", use_container_width=True, disabled=True)
+
+    with cta_reflect:
         with st.container(border=True):
-            render_atlas_card(
-                title="Explore",
-                value="Families",
-                delta_text="Family-level resilience.",
-                status="Future feature.",
-                delta_color="#84CC16",
-                card_class="atlas-gap-card atlas-gap-card-top atlas-cta-explore",
+            st.html(
+                """
+                <div class="atlas-cta-reflect" style="min-height:132px; padding:14px 16px;">
+                    <div style="color:#94A3B8; font-size:0.72rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase;">Reflect</div>
+                    <div style="color:#A855F7; font-size:1.12rem; font-weight:900; margin:8px 0;">Learning Summary</div>
+                    <div style="color:#CBD5E1; font-size:0.84rem; line-height:1.35;">Move to P5 and turn this journey into a learning record.</div>
+                </div>
+                """
             )
-            st.button("Explore", key="p4_cta_families", use_container_width=True, disabled=True)
-    with cta5:
-        with st.container(border=True):
-            render_atlas_card(
-                title="Reflect",
-                value="Learning Summary",
-                delta_text="Move to P5.",
-                status="Turn this into a learning record.",
-                delta_color="#A855F7",
-                card_class="atlas-gap-card atlas-gap-card-top atlas-cta-reflect",
-            )
-            if st.button("Reflect & Learn", key="p4_cta_reflect", use_container_width=True):
+            if st.button("Open Learning Summary", key="p4_cta_reflect", use_container_width=True):
                 safe_switch_page("pages/p5_reflection.py")
 
 with right_col:
@@ -1606,33 +2086,14 @@ with right_col:
 st.markdown("---")
 st.html(
     """
-    <div style="border:1px solid rgba(245,158,11,0.30); border-radius:14px; background:rgba(120,53,15,0.20); padding:12px 16px; margin-bottom:10px;">
-        <div style="color:#FBBF24; font-size:0.76rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; margin-bottom:4px;">Journey Log</div>
-        <div style="color:#E2E8F0; font-size:0.92rem; line-height:1.4;">Full-width record of challenge and recovery tests created during this page.</div>
+    <div style="border:1px solid rgba(56,189,248,0.30); border-radius:14px; background:rgba(30,58,95,0.55); padding:12px 16px; margin-bottom:10px;">
+        <div style="color:#38BDF8; font-size:0.76rem; font-weight:900; letter-spacing:0.10em; text-transform:uppercase; margin-bottom:4px;">Journey Log</div>
+        <div style="color:#E2E8F0; font-size:0.92rem; line-height:1.4;">Shared record from P1 onward. Latest actions first; full details remain stored for P5/export.</div>
     </div>
     """
 )
 
-if st.session_state["p4_journey_log"]:
-    journey_log_df = pd.DataFrame(st.session_state["p4_journey_log"])
-else:
-    journey_log_df = pd.DataFrame([
-        {
-            "step": 4,
-            "page": "P4 Challenge Mode",
-            "country": selected_country,
-            "challenge": applied_challenge,
-            "strength": applied_strength,
-            "response": response_to_text(draft_response),
-            "largest_damage": f"{shock_damage_name} ({shock_damage_delta:+.1f})",
-            "largest_recovery": "Run Recovery Test",
-            "resilience": f"Shock: {shock_resilience:.0f}/100",
-            "learning": "Run challenge and recovery tests to create the first mission entry.",
-            "next_step": "Run Challenge Test",
-        }
-    ])
-
 with st.expander("View Full Journey Log", expanded=False):
-    render_journey_log_html(journey_log_df)
+    render_journey_log_html(get_journey_log_df())
 
 render_footer()

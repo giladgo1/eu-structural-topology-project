@@ -1,7 +1,7 @@
 """
 p0_landing.py
 
-European Strategy Atlas landing page.
+EUROPEAN STRATEGY ATLAS landing page.
 
 Purpose:
 - orient the user
@@ -17,7 +17,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from components.typography import render_section_title
-from components.page_frame import render_footer
 
 
 # =============================================================================
@@ -59,19 +58,28 @@ hero_bg = image_to_base64(hero_bg_path)
 # PAGE HEADER
 # =============================================================================
 
-st.html(
-    """
-    <div class="p1-brand">
-        <div class="p1-logo">✦</div>
-        <div>
-            <div class="p1-brand-title">EUROPEAN<br>STRATEGY ATLAS</div>
-            <div class="p1-brand-subtitle">
-                Explore pathways • Understand tradeoffs • Learn through experimentation
+top_brand_col, top_start_col = st.columns([4.0, 1.15], gap="medium")
+
+with top_brand_col:
+    st.html(
+        """
+        <div class="p1-brand">
+            <div class="p1-logo">✦</div>
+            <div>
+                <div class="p1-brand-title">EUROPEAN<br>STRATEGY ATLAS</div>
+                <div class="p1-brand-subtitle">
+                    Explore pathways • Understand tradeoffs • Learn through experimentation
+                </div>
             </div>
         </div>
-    </div>
-    """
-)
+        """
+    )
+
+with top_start_col:
+    st.write("")
+    st.write("")
+    if st.button("Start Exploring →", key="p0_top_start_exploring", use_container_width=True):
+        st.switch_page("pages/p1_country_explorer.py")
 
 
 # =============================================================================
@@ -166,7 +174,7 @@ html, body {{
 
 .p0-hero {{
     position: relative;
-    min-height: 760px;
+    min-height: 700px;
     border-radius: 34px;
     overflow: hidden;
     margin: 0;
@@ -206,7 +214,7 @@ html, body {{
 .p0-hero-content {{
     position: absolute;
     left: 56px;
-    top: 78px;
+    top: 60px;
     width: 780px;
     z-index: 2;
 }}
@@ -222,7 +230,7 @@ html, body {{
 
 .p0-hero-title {{
     color: #F8FAFC;
-    font-size: 4.0rem;
+    font-size: 3.7rem;
     line-height: 0.98;
     font-weight: 900;
     letter-spacing: -0.055em;
@@ -255,7 +263,7 @@ html, body {{
     display: flex;
     flex-wrap: nowrap;
     gap: 10px;
-    margin-top: 34px;
+    margin-top: 28px;
 }}
 
 .p0-hero-pills div {{
@@ -271,14 +279,14 @@ html, body {{
 
 .p0-hero-legend {{
     position: absolute;
-    right: 42px;
-    top: 62px;
+    right: 36px;
+    top: 46px;
     width: 350px;
     z-index: 3;
     background: rgba(15,23,42,0.80);
     border: 1px solid rgba(148,163,184,0.30);
     border-radius: 24px;
-    padding: 24px;
+    padding: 20px;
     backdrop-filter: blur(12px);
 }}
 
@@ -322,7 +330,7 @@ html, body {{
     position: absolute;
     left: 42px;
     right: 42px;
-    bottom: 20px;
+    bottom: 18px;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 18px;
@@ -330,9 +338,9 @@ html, body {{
 }}
 
 .p0-entry-card {{
-    min-height: 158px;
+    min-height: 138px;
     border-radius: 22px;
-    padding: 24px;
+    padding: 20px;
     display: grid;
     grid-template-columns: 54px 1fr;
     gap: 18px;
@@ -401,7 +409,7 @@ html, body {{
 </style>
 """
 
-components.html(hero_html, height=780, scrolling=False)
+components.html(hero_html, height=720, scrolling=False)
 
 
 # =============================================================================
@@ -429,7 +437,6 @@ st.markdown(
 .p0-loop-text-card,
 .p0-loop-image-shell,
 .p0-assumption-card,
-.p0-ai-card,
 .p0-cta-box {
     border-radius: 22px;
     background: linear-gradient(145deg, rgba(15,23,42,0.94), rgba(15,23,42,0.74));
@@ -618,37 +625,6 @@ st.markdown(
     white-space: nowrap;
 }
 
-.p0-ai-card {
-    padding: 30px;
-    border: 1px solid rgba(139,92,246,0.34);
-    background:
-        radial-gradient(circle at top left, rgba(139,92,246,0.18), transparent 34%),
-        linear-gradient(145deg, rgba(15,23,42,0.94), rgba(15,23,42,0.74));
-}
-
-.p0-ai-kicker {
-    color: #A78BFA;
-    font-size: 0.76rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    margin-bottom: 12px;
-}
-
-.p0-ai-title {
-    color: #F8FAFC;
-    font-size: 1.55rem;
-    font-weight: 950;
-    margin-bottom: 10px;
-    line-height: 1.25;
-}
-
-.p0-ai-body {
-    color: #CBD5E1;
-    font-size: 1.04rem;
-    line-height: 1.55;
-}
-
 .p0-cta-box {
     padding: 40px;
     text-align: center;
@@ -674,18 +650,63 @@ st.markdown(
     margin: 0 auto;
 }
 
-div[data-testid="stPageLink"] a,
-.stButton > button {
-    width: 100% !important;
-    min-height: 46px !important;
-    border-radius: 12px !important;
-    border: 1px solid rgba(56,189,248,0.55) !important;
-    background: linear-gradient(90deg, #38BDF8 0%, #2563EB 100%) !important;
+.p0-final-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin-top: 18px;
+    margin-bottom: 12px;
+}
+
+.p0-final-button {
+    min-width: 285px;
+    max-width: 340px;
+    min-height: 48px;
+    padding: 14px 28px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none !important;
+    font-weight: 900;
+    font-size: 1.0rem;
+    transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.p0-final-button:hover {
+    transform: translateY(-1px);
+}
+
+.p0-final-button.primary {
     color: #F8FAFC !important;
-    font-weight: 900 !important;
-    box-shadow: 0 0 24px rgba(56,189,248,0.30) !important;
-    text-align: center !important;
-    justify-content: center !important;
+    border: 1px solid rgba(56,189,248,0.70);
+    background: linear-gradient(90deg, #38BDF8 0%, #2563EB 100%);
+    box-shadow: 0 0 24px rgba(56,189,248,0.28);
+}
+
+.p0-final-button.secondary {
+    color: #E0F2FE !important;
+    border: 1px solid rgba(56,189,248,0.42);
+    background: rgba(15,23,42,0.72);
+    box-shadow: 0 0 18px rgba(56,189,248,0.10);
+}
+
+.p0-final-button.secondary:hover {
+    border-color: rgba(56,189,248,0.72);
+    box-shadow: 0 0 22px rgba(56,189,248,0.18);
+}
+
+@media (max-width: 760px) {
+    .p0-final-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .p0-final-button {
+        min-width: 100%;
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 1100px) {
@@ -798,7 +819,7 @@ st.html(
         <img
             src="data:image/png;base64,{loop_img}"
             class="p0-loop-image"
-            alt="European Strategy Atlas learning loop: Observe, Investigate, Choose, Challenge, Reflect"
+            alt="EUROPEAN STRATEGY ATLAS learning loop: Observe, Investigate, Choose, Challenge, Reflect"
         />
     </div>
 </div>
@@ -858,71 +879,62 @@ st.html(
 
 
 # =============================================================================
-# SECTION 05 — FUTURE ATLAS GUIDE
+# SECTION 05 — READY TO BEGIN
 # =============================================================================
 
 render_section_title(
     number="05",
-    title="Future Atlas Guide",
-    subtitle="Future AI support may guide learning, but it will not recommend policy or optimize decisions.",
-)
-
-st.html(
-    """
-<div class="p0-ai-card">
-    <div class="p0-ai-kicker">Future V2 feature</div>
-    <div class="p0-ai-title">A guide that explains, compares, and asks better questions.</div>
-    <div class="p0-ai-body">
-        The future Strategy Guide may help explain a country profile, compare two pathways,
-        clarify a tradeoff, or suggest what to explore next. It will not forecast outcomes,
-        optimize policy, rank countries, or tell users what Europe should do.
-    </div>
-</div>
-"""
-)
-
-
-# =============================================================================
-# SECTION 06 — READY TO BEGIN
-# =============================================================================
-
-render_section_title(
-    number="06",
     title="Ready to begin?",
-    subtitle="Start by choosing a country and observing its structural profile.",
+    subtitle="Start with a country profile, or open the methodology appendix first.",
 )
 
 st.html(
     """
 <div class="p0-cta-box">
-    <div class="p0-cta-title">Begin the exploration journey</div>
+    <div class="p0-cta-title">Enter Atlas →</div>
     <div class="p0-cta-text">
-        Start with a country. Investigate tradeoffs, build a strategy,
-        challenge it under disruption, and reflect on what you learned.
+        Choose a country to explore. Start with its structural profile, then investigate tradeoffs,
+        test strategic choices, challenge them under disruption, and reflect on what you learned.
     </div>
 </div>
 """
 )
 
-p1_page_path = Path(__file__).parent / "p1_country_explorer.py"
-
-if p1_page_path.exists():
-    st.page_link(
-        "pages/p1_country_explorer.py",
-        label="Enter Atlas →",
-        use_container_width=True,
-    )
-else:
-    st.button(
-        "Enter Atlas →",
-        disabled=False,
-        use_container_width=True,
-        key="p0_enter_atlas",
-    )
-
 
 # =============================================================================
-# FOOTER
+# NAVIGATION ACTIONS
 # =============================================================================
 
-render_footer()
+def initialize_atlas_defaults() -> None:
+    """Initialize safe current version defaults before entering the Atlas."""
+    st.session_state["selected_country"] = "Germany"
+    st.session_state["country"] = "Germany"
+    st.session_state["selected_reference"] = "EU Average"
+    st.session_state["reference"] = "EU Average"
+    st.session_state["reference_choice"] = "EU Average"
+    st.session_state["comparison_reference"] = "EU Average"
+    st.session_state["view_mode"] = "Relative"
+    st.session_state["display_mode"] = "Relative"
+    st.session_state["analysis_mode"] = "Relative"
+
+
+# Initialize safe current version defaults on the landing page.
+# Entering the Atlas starts the user at P1 with Germany, EU Average, Relative mode.
+initialize_atlas_defaults()
+
+st.html(
+    """
+<div class="p0-final-actions">
+    <a class="p0-final-button primary" href="/p1_country_explorer" target="_self">
+        Enter Atlas →
+    </a>
+    <a class="p0-final-button secondary" href="/p6_how_it_was_made" target="_self">
+        How the Atlas Works
+    </a>
+</div>
+"""
+)
+
+
+# Footer intentionally removed from P0.
+# Section 04 already provides the public-data, educational-use, and limitation framing.

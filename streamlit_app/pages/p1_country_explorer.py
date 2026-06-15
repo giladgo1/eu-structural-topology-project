@@ -71,6 +71,7 @@ from utils.insight_rules import (
     get_key_strengths,
     get_key_constraints,
 )
+from utils.atlas_state import init_atlas_state, update_atlas_context
 
 
 # =============================================================================
@@ -433,6 +434,287 @@ def render_observation_box(title: str, text: str, accent: str = "#38BDF8"):
         """
     )
 
+
+
+# =============================================================================
+# P1 RADAR — SELECTED COUNTRY + OPTIONAL REFERENCE COUNTRY
+# =============================================================================
+
+RADAR_DIMENSION_ORDER = [
+    "Innovation Capacity",
+    "Human Capital Capacity",
+    "Sustainability Capacity",
+    "Adaptive Transformation",
+    "Security Reprioritization",
+    "Fiscal Flexibility",
+    "Social Stability",
+]
+
+RADAR_DIMENSION_ALIASES = {
+    "Innovation Capacity": ["Innovation Capacity", "dim_innovation_capacity", "innovation_capacity"],
+    "Human Capital Capacity": ["Human Capital Capacity", "dim_human_capital_capacity", "human_capital_capacity"],
+    "Sustainability Capacity": ["Sustainability Capacity", "dim_sustainability_capacity", "sustainability_capacity"],
+    "Adaptive Transformation": ["Adaptive Transformation", "dim_adaptive_transformation", "adaptive_transformation"],
+    "Security Reprioritization": ["Security Reprioritization", "dim_security_reprioritization", "security_reprioritization"],
+    "Fiscal Flexibility": ["Fiscal Flexibility", "dim_fiscal_flexibility", "fiscal_flexibility"],
+    "Social Stability": ["Social Stability", "dim_social_stability", "social_stability"],
+}
+
+
+def _get_nested_dimension_value(profile, label: str) -> float:
+    """Read one dimension score from a country profile dict/Series safely."""
+    aliases = RADAR_DIMENSION_ALIASES.get(label, [label])
+
+    # Preferred structure from load_country_profile: profile["dimensions"]
+    try:
+        dims = profile.get("dimensions", {})
+    except Exception:
+        dims = {}
+
+    if isinstance(dims, dict):
+        for key in aliases:
+            if key in dims:
+                try:
+                    return float(dims[key])
+                except Exception:
+                    pass
+
+    # Fallback: flat dict / pandas Series
+    for key in aliases:
+        try:
+            if key in profile:
+                return float(profile[key])
+        except Exception:
+            pass
+
+    return 0.0
+
+
+def _radar_values_from_profile(profile) -> list[float]:
+    return [_get_nested_dimension_value(profile, dim) for dim in RADAR_DIMENSION_ORDER]
+
+
+
+def create_p1_reference_radar_chart(
+    country_profile,
+    selected_country: str,
+    reference_profile=None,
+    reference_country: str | None = None,
+):
+    """P1 structural radar with direct labels and no Plotly legend.
+
+    Final visual grammar:
+    - selected country = purple filled radar polygon
+    - selected country direct label = "<country> Structural performance"
+    - EU baseline = cyan dotted zero contour
+    - optional reference country = thin light-gray dotted contour
+    - reference direct label = "<ref country> REF"
+    - no Plotly legend, no old trace labels, no undefined placeholders
+    """
+    theta = RADAR_DIMENSION_ORDER + [RADAR_DIMENSION_ORDER[0]]
+
+    def clean_label(value: object, fallback: str = "") -> str:
+        label = str(value or "").strip()
+        if label.lower() in {"", "none", "nan", "undefined", "null"}:
+            return fallback
+        return label
+
+    selected_country_label = clean_label(selected_country, "Selected country")
+    reference_country_label = clean_label(reference_country, "")
+
+    has_reference = (
+        reference_profile is not None
+        and bool(reference_country_label)
+        and reference_country_label != selected_country_label
+    )
+
+    selected_color = "#8B5CF6"
+    reference_color = "#EAB308"
+    eu_color = "#38BDF8"
+
+    country_values = _radar_values_from_profile(country_profile)
+    country_values_closed = country_values + [country_values[0]]
+    eu_values_closed = [0.0 for _ in theta]
+
+    fig = go.Figure()
+
+    # EU baseline — cyan dotted zero contour.
+    fig.add_trace(
+        go.Scatterpolar(
+            r=eu_values_closed,
+            theta=theta,
+            mode="lines",
+            line=dict(
+                color=eu_color,
+                width=1.15,
+                dash="dot",
+            ),
+            hoverinfo="skip",
+            showlegend=False,
+            name="",
+            legendgroup="",
+        )
+    )
+
+    # Optional reference country — light-gray dotted contour.
+    if has_reference:
+        reference_values = _radar_values_from_profile(reference_profile)
+        reference_values_closed = reference_values + [reference_values[0]]
+
+        fig.add_trace(
+            go.Scatterpolar(
+                r=reference_values_closed,
+                theta=theta,
+                mode="lines",
+                line=dict(
+                    color=reference_color,
+                    width=1.15,
+                    dash="dot",
+                ),
+                hovertemplate=(
+                    f"<b>{reference_country_label} REF</b><br>"
+                    "%{theta}: %{r:.2f}<extra></extra>"
+                ),
+                showlegend=False,
+                name="",
+                legendgroup="",
+            )
+        )
+
+    # Selected country — main purple filled profile.
+    fig.add_trace(
+        go.Scatterpolar(
+            r=country_values_closed,
+            theta=theta,
+            mode="lines",
+            line=dict(
+                color=selected_color,
+                width=2.35,
+            ),
+            fill="toself",
+            fillcolor="rgba(139,92,246,0.36)",
+            hovertemplate=(
+                f"<b>{selected_country_label}</b><br>"
+                "%{theta}: %{r:.2f}<extra></extra>"
+            ),
+            showlegend=False,
+            name="",
+            legendgroup="",
+        )
+    )
+
+    annotations = [
+        # #1 selected country label — top-center above radar.
+        dict(
+            x=0.50,
+            y=1.085,
+            xref="paper",
+            yref="paper",
+            text=f"<b>{selected_country_label}</b> Structural performance",
+            showarrow=False,
+            font=dict(
+                color=selected_color,
+                size=15,
+            ),
+            align="center",
+            xanchor="center",
+            yanchor="bottom",
+        ),
+        # EU baseline label — center anchor.
+        dict(
+            x=0.50,
+            y=0.50,
+            xref="paper",
+            yref="paper",
+            text="EU = 0 baseline",
+            showarrow=False,
+            font=dict(
+                color=eu_color,
+                size=11,
+            ),
+            align="center",
+            xanchor="center",
+            yanchor="middle",
+        ),
+    ]
+
+    # #2 reference country label — lower/right inside radar.
+    if has_reference:
+        annotations.append(
+            dict(
+                x=0.72,
+                y=0.34,
+                xref="paper",
+                yref="paper",
+                text=f"{reference_country_label} REF",
+                showarrow=False,
+                font=dict(
+                    color=reference_color,
+                    size=11,
+                ),
+                align="center",
+                xanchor="center",
+                yanchor="middle",
+            )
+        )
+
+    fig.update_layout(
+        title=dict(text=""),
+        showlegend=False,
+        legend=dict(
+            visible=False,
+            x=0,
+            y=0,
+            bgcolor="rgba(0,0,0,0)",
+            font=dict(size=1, color="rgba(0,0,0,0)"),
+        ),
+        annotations=annotations,
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(
+            color="#E5E7EB",
+            size=12,
+        ),
+        height=455,
+        margin=dict(
+            l=38,
+            r=38,
+            t=90,
+            b=34,
+        ),
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(
+                visible=True,
+                range=[-1.5, 1.6],
+                tickvals=[-1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5],
+                tickfont=dict(
+                    color="#CBD5E1",
+                    size=10,
+                ),
+                gridcolor="rgba(148,163,184,0.26)",
+                linecolor="rgba(148,163,184,0.30)",
+            ),
+            angularaxis=dict(
+                tickfont=dict(
+                    color="#F8FAFC",
+                    size=11,
+                ),
+                gridcolor="rgba(148,163,184,0.18)",
+                linecolor="rgba(148,163,184,0.22)",
+            ),
+        ),
+    )
+
+    # Final hard guard: remove all Plotly legend text, including "undefined".
+    for trace in fig.data:
+        trace.update(
+            showlegend=False,
+            name="",
+            legendgroup="",
+        )
+
+    return fig
 
 def format_score(value, view_mode: str = "Relative") -> str:
     if pd.isna(value):
@@ -1130,6 +1412,17 @@ with header_col4:
         index=0,
     )
 
+# Keep P1 selection available to P2-P5.
+init_atlas_state()
+update_atlas_context(
+    country=selected_country,
+    reference_type=selected_reference,
+    reference_country=reference_country,
+    view_mode=view_mode,
+    source_page="P1 Country Explorer",
+    log_context_change=False,
+)
+
 
 # =============================================================================
 # DATA CONTEXT
@@ -1398,8 +1691,24 @@ with main_col:
         )
 
     with section_center:
-        radar_chart = create_dimension_radar_chart(country_profile)
-        st.plotly_chart(radar_chart, use_container_width=True)
+        reference_profile_for_radar = None
+        reference_country_for_radar = None
+        if selected_reference == "Another Country" and reference_country:
+            reference_profile_for_radar = load_country_profile(reference_country)
+            reference_country_for_radar = reference_country
+
+        radar_chart = create_p1_reference_radar_chart(
+            country_profile=country_profile,
+            selected_country=selected_country,
+            reference_profile=reference_profile_for_radar,
+            reference_country=reference_country_for_radar,
+        )
+        st.plotly_chart(
+            radar_chart,
+            use_container_width=True,
+            key="p1_structural_radar_final",
+            config={"displayModeBar": False},
+        )
 
     with section_right:
         st.markdown("**Key constraints**")

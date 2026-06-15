@@ -3,7 +3,7 @@ p2_tradeoff_explorer.py
 
 Purpose
 -------
-Page 2 of the European Strategy Atlas.
+Page 2 of the EUROPEAN STRATEGY ATLAS.
 
 This page answers:
 
@@ -39,6 +39,15 @@ from components.page_frame import (
     render_footer,
 )
 
+from utils.atlas_state import (
+    init_atlas_state,
+    update_atlas_context,
+    add_journey_event,
+    get_journey_log_df,
+)
+from utils.journey_progress import render_journey_progress
+
+
 
 # =============================================================================
 # LOAD GLOBAL CSS
@@ -66,7 +75,7 @@ load_css()
 # =============================================================================
 
 def safe_switch_page(page_path: str):
-    """Try Streamlit page navigation without breaking the MVP if a page path differs."""
+    """Try Streamlit page navigation without breaking the current version if a page path differs."""
     try:
         st.switch_page(page_path)
     except Exception:
@@ -113,6 +122,92 @@ def load_p2_tradeoff_data():
 
 
 tradeoff_df = load_p2_tradeoff_data()
+
+
+# =============================================================================
+# SHARED ATLAS MEMORY HELPERS
+# =============================================================================
+
+DEFAULT_COUNTRY = "Germany"
+DEFAULT_REFERENCE_TYPE = "EU Average"
+DEFAULT_REFERENCE_COUNTRY = "Germany"
+DEFAULT_VIEW_MODE = "Relative"
+
+init_atlas_state(
+    default_country=DEFAULT_COUNTRY,
+    default_reference=DEFAULT_REFERENCE_TYPE,
+    default_reference_country=DEFAULT_REFERENCE_COUNTRY,
+    default_view_mode=DEFAULT_VIEW_MODE,
+)
+
+
+def _valid_or_default(value, options, fallback):
+    if value in options:
+        return value
+    if fallback in options:
+        return fallback
+    return options[0] if options else fallback
+
+
+def initialize_p2_from_atlas_state(country_options, reference_options, view_options):
+    """Initialize P2 controls from the shared Atlas journey state.
+
+    P1 writes the selected country/reference into atlas_* keys before navigation.
+    P2 must read those keys before rendering widgets; otherwise the app resets to
+    Germany / EU Average and breaks the learning journey.
+    """
+    atlas_country = _valid_or_default(
+        st.session_state.get("atlas_country", st.session_state.get("selected_country", DEFAULT_COUNTRY)),
+        country_options,
+        DEFAULT_COUNTRY,
+    )
+    atlas_reference = _valid_or_default(
+        st.session_state.get("atlas_reference_type", st.session_state.get("selected_reference", DEFAULT_REFERENCE_TYPE)),
+        reference_options,
+        DEFAULT_REFERENCE_TYPE,
+    )
+    atlas_reference_country = _valid_or_default(
+        st.session_state.get("atlas_reference_country", st.session_state.get("reference_country", DEFAULT_REFERENCE_COUNTRY)),
+        country_options,
+        DEFAULT_REFERENCE_COUNTRY,
+    )
+    atlas_view_mode = _valid_or_default(
+        st.session_state.get("atlas_view_mode", st.session_state.get("view_mode", DEFAULT_VIEW_MODE)),
+        view_options,
+        DEFAULT_VIEW_MODE,
+    )
+
+    atlas_tuple = (atlas_country, atlas_reference, atlas_reference_country, atlas_view_mode)
+
+    if st.session_state.get("p2_last_synced_atlas_tuple") != atlas_tuple:
+        st.session_state["p2_selected_country"] = atlas_country
+        st.session_state["p2_selected_reference"] = atlas_reference
+        st.session_state["p2_reference_country"] = atlas_reference_country
+        st.session_state["p2_view_mode"] = atlas_view_mode
+        st.session_state["p2_last_synced_atlas_tuple"] = atlas_tuple
+
+
+def sync_p2_to_atlas_state(log_context_change: bool = True):
+    """Persist current P2 controls back into the shared Atlas journey state."""
+    selected_country = st.session_state.get("p2_selected_country", DEFAULT_COUNTRY)
+    selected_reference = st.session_state.get("p2_selected_reference", DEFAULT_REFERENCE_TYPE)
+    reference_country = st.session_state.get("p2_reference_country", DEFAULT_REFERENCE_COUNTRY)
+    view_mode = st.session_state.get("p2_view_mode", DEFAULT_VIEW_MODE)
+
+    update_atlas_context(
+        country=selected_country,
+        reference_type=selected_reference,
+        reference_country=reference_country,
+        view_mode=view_mode,
+        source_page="P2 Tradeoff Explorer",
+        log_context_change=log_context_change,
+    )
+    st.session_state["p2_last_synced_atlas_tuple"] = (
+        selected_country,
+        selected_reference,
+        reference_country,
+        view_mode,
+    )
 
 
 # =============================================================================
@@ -251,7 +346,7 @@ def render_p2_info_card(title: str, value: str, body: str, accent: str = "#38BDF
     st.html(
         f"""
         <div style="
-            padding: 18px 18px 16px 18px;
+            padding: 14px 15px 13px 15px;
             border-radius: 18px;
             border: 1px solid rgba(148,163,184,0.22);
             border-left: 5px solid {accent};
@@ -393,7 +488,7 @@ def render_pattern_summary_card(
         <div style="
             border: 1px solid rgba(56,189,248,0.46);
             border-radius: 18px;
-            padding: 18px 18px 16px 18px;
+            padding: 14px 15px 13px 15px;
             background:
                 linear-gradient(135deg, rgba(30,58,95,0.78), rgba(15,23,42,0.86));
             margin-bottom: 12px;
@@ -405,7 +500,7 @@ def render_pattern_summary_card(
                 right:16px;
                 top:22px;
                 color:#38BDF8;
-                font-size:3.2rem;
+                font-size:2.6rem;
                 font-weight:900;
                 opacity:0.35;
                 line-height:1;
@@ -422,7 +517,7 @@ def render_pattern_summary_card(
 
             <div style="
                 color:#F8FAFC;
-                font-size:1.26rem;
+                font-size:1.08rem;
                 font-weight:900;
                 line-height:1.2;
                 margin-bottom:10px;
@@ -605,7 +700,7 @@ def render_compact_lens_block(
         """
     )
 
-def make_tradeoff_scatter(df, selected_country, tradeoff_config, correlation=None):
+def make_tradeoff_scatter(df, selected_country, tradeoff_config, correlation=None, reference_country=None):
     x_col = tradeoff_config["x_col"]
     y_col = tradeoff_config["y_col"]
     x_label = tradeoff_config["x_label"]
@@ -683,6 +778,42 @@ def make_tradeoff_scatter(df, selected_country, tradeoff_config, correlation=Non
                 )
 
     selected_df = plot_df[plot_df["country_name"] == selected_country]
+    reference_df = pd.DataFrame()
+    if reference_country and reference_country != selected_country:
+        reference_df = plot_df[plot_df["country_name"] == reference_country]
+
+    # If the user selected "Another Country" as reference, show it on the same
+    # tradeoff map as a smaller diamond. The main selected country remains the
+    # large star. This keeps P2 aligned with the P1 comparison context without
+    # adding a new analysis layer.
+    if not reference_df.empty:
+        reference_family_name = reference_df.iloc[0].get("structural_family", None)
+        reference_family_color = FAMILY_COLORS.get(reference_family_name, "#94A3B8")
+        fig.add_trace(
+            go.Scatter(
+                x=reference_df[x_col],
+                y=reference_df[y_col],
+                mode="markers+text",
+                name=f"{reference_country} reference",
+                marker=dict(
+                    size=18,
+                    color=reference_family_color,
+                    symbol="diamond",
+                    opacity=0.95,
+                    line=dict(width=2.2, color="#F8FAFC"),
+                ),
+                text=[f"{reference_country}"],
+                textposition="bottom center",
+                textfont=dict(color="#CBD5E1", size=13),
+                hovertemplate=(
+                    "<b>%{text}</b><br>Reference country<br>"
+                    f"{x_label}: " + "%{x:.2f}<br>"
+                    f"{y_label}: " + "%{y:.2f}"
+                    "<extra></extra>"
+                ),
+                showlegend=False,
+            )
+        )
 
     selected_family_color = "#EAB308"
     if not selected_df.empty:
@@ -772,7 +903,7 @@ def make_tradeoff_scatter(df, selected_country, tradeoff_config, correlation=Non
     )
 
     fig.update_layout(
-        height=520,
+        height=450,
         template="plotly_dark",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(15,23,42,0.32)",
@@ -808,7 +939,7 @@ def make_tradeoff_scatter(df, selected_country, tradeoff_config, correlation=Non
 
 
 def render_equal_interpretation_card(title: str, value: str, body: str, status: str, accent: str = "#38BDF8"):
-    """Equal-height interpretation card for Section 05 MVP logic."""
+    """Equal-height interpretation card for Section 05 current version logic."""
     st.html(
         f"""
         <div style="
@@ -817,7 +948,7 @@ def render_equal_interpretation_card(title: str, value: str, body: str, status: 
             border-radius: 16px;
             border: 1px solid rgba(56,189,248,0.34);
             background: linear-gradient(135deg, rgba(30,58,95,0.82), rgba(15,23,42,0.86));
-            padding: 18px 18px 16px 18px;
+            padding: 14px 15px 13px 15px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -835,30 +966,62 @@ def render_equal_interpretation_card(title: str, value: str, body: str, status: 
 
 
 def render_journey_log_html(log_df: pd.DataFrame):
-    """Wide, readable HTML journey log table for MVP review."""
+    """Compact, newest-first journey log table for current version review.
+
+    The full shared log remains stored in st.session_state. This display keeps
+    only the columns users need during the demo and shows the latest action first.
+    """
+    if log_df is None or log_df.empty:
+        st.info("No journey actions recorded yet.")
+        return
+
+    display_cols = [
+        "step",
+        "page",
+        "country",
+        "reference",
+        "topic",
+        "observation",
+        "next_step",
+    ]
     display_df = log_df.copy()
+    for col in display_cols:
+        if col not in display_df.columns:
+            display_df[col] = ""
+
+    display_df = (
+        display_df[display_cols]
+        .sort_values("step", ascending=False)
+        .head(8)
+    )
+
+    rename_map = {
+        "step": "Step",
+        "page": "Page",
+        "country": "Country",
+        "reference": "Reference",
+        "topic": "Topic",
+        "observation": "Observation",
+        "next_step": "Next",
+    }
+    display_df = display_df.rename(columns=rename_map)
+
     html_rows = []
     for _, row in display_df.iterrows():
-        cells = "".join(
-            f"<td>{row[col]}</td>" for col in display_df.columns
-        )
+        cells = "".join(f"<td>{row[col]}</td>" for col in display_df.columns)
         html_rows.append(f"<tr>{cells}</tr>")
 
     headers = "".join(f"<th>{col}</th>" for col in display_df.columns)
     rows = "".join(html_rows)
 
     column_widths = {
-        "step": "4%",
-        "page": "9%",
-        "action_type": "7%",
-        "country": "7%",
-        "topic": "13%",
-        "observation": "30%",
-        "evidence": "8%",
-        "confidence": "7%",
-        "family_context": "15%",
-        "exception": "10%",
-        "next_step": "9%",
+        "Step": "5%",
+        "Page": "13%",
+        "Country": "9%",
+        "Reference": "12%",
+        "Topic": "18%",
+        "Observation": "34%",
+        "Next": "9%",
     }
     colgroup = "".join(
         f'<col style="width:{column_widths.get(col, "120px")};">'
@@ -872,11 +1035,11 @@ def render_journey_log_html(log_df: pd.DataFrame):
             border-radius: 16px;
             border: 1px solid rgba(56,189,248,0.34);
             background: rgba(15, 23, 42, 0.72);
-            padding: 16px;
+            padding: 14px;
             overflow-x: auto;
         ">
-            <div style="color:#F8FAFC; font-size:1rem; font-weight:900; margin-bottom:6px;">Journey Log Table</div>
-            <div style="color:#CBD5E1; font-size:0.82rem; margin-bottom:14px;">Wide MVP view. Later this becomes the full cross-page journey table for P5 and export.</div>
+            <div style="color:#F8FAFC; font-size:1rem; font-weight:900; margin-bottom:4px;">Journey Log</div>
+            <div style="color:#CBD5E1; font-size:0.82rem; margin-bottom:12px;">Latest actions first. Full details remain stored for P5/export.</div>
             <table style="
                 width:100%;
                 border-collapse: collapse;
@@ -895,18 +1058,18 @@ def render_journey_log_html(log_df: pd.DataFrame):
                 background: rgba(56, 189, 248, 0.14);
                 color: #E0F2FE;
                 border: 1px solid rgba(148,163,184,0.40);
-                padding: 10px 9px;
+                padding: 9px 8px;
                 text-align: left;
-                font-size: 0.76rem;
+                font-size: 0.74rem;
                 font-weight: 900;
                 letter-spacing: 0.04em;
                 text-transform: uppercase;
             }}
             table td {{
                 border: 1px solid rgba(148,163,184,0.32);
-                padding: 11px 9px;
+                padding: 9px 8px;
                 vertical-align: top;
-                line-height: 1.35;
+                line-height: 1.34;
                 background: rgba(51, 65, 85, 0.78);
                 word-wrap: break-word;
             }}
@@ -922,8 +1085,7 @@ def render_journey_log_html(log_df: pd.DataFrame):
 # PAGE CONFIG
 # =============================================================================
 
-st.markdown("## P2 — Tradeoff Explorer")
-st.caption("Skeleton page. Frame first, content second, data later.")
+st.markdown("## P2 — Investigate Tradeoffs")
 
 st.html("""
 <style>
@@ -968,28 +1130,47 @@ with top_col1:
         """
     )
 
-with top_col2:
-    country_options = sorted(tradeoff_df["country_name"].dropna().unique().tolist())
+country_options = sorted(tradeoff_df["country_name"].dropna().unique().tolist())
+reference_options = ["EU Average", "Family Average", "Another Country"]
+view_options = ["Relative", "Absolute"]
 
+initialize_p2_from_atlas_state(
+    country_options=country_options,
+    reference_options=reference_options,
+    view_options=view_options,
+)
+
+with top_col2:
     selected_country = st.selectbox(
         "Country",
         options=country_options,
-        index=country_options.index("Germany") if "Germany" in country_options else 0,
+        key="p2_selected_country",
     )
 
 with top_col3:
     selected_reference = st.selectbox(
         "Reference",
-        options=["EU Average", "Family Average", "Another Country"],
-        index=0,
+        options=reference_options,
+        key="p2_selected_reference",
     )
 
 with top_col_ref_country:
     if selected_reference == "Another Country":
+        reference_country_options = [c for c in country_options if c != selected_country]
+        if not reference_country_options:
+            reference_country_options = country_options
+
+        if st.session_state.get("p2_reference_country") not in reference_country_options:
+            st.session_state["p2_reference_country"] = _valid_or_default(
+                st.session_state.get("atlas_reference_country", DEFAULT_REFERENCE_COUNTRY),
+                reference_country_options,
+                DEFAULT_REFERENCE_COUNTRY,
+            )
+
         reference_country = st.selectbox(
             "Reference Country",
-            options=["Sweden", "Romania", "Italy", "Poland"],
-            index=0,
+            options=reference_country_options,
+            key="p2_reference_country",
         )
     else:
         reference_country = None
@@ -997,15 +1178,18 @@ with top_col_ref_country:
             "Reference Country",
             value="-----------",
             disabled=True,
+            key="p2_reference_country_disabled",
         )
 
 with top_col4:
     view_mode = st.radio(
         "View Mode",
-        options=["Relative", "Absolute"],
+        options=view_options,
         horizontal=True,
-        index=0,
+        key="p2_view_mode",
     )
+
+sync_p2_to_atlas_state()
 
 
 # =============================================================================
@@ -1055,6 +1239,16 @@ st.html(
 )
 
 
+render_journey_progress(2)
+
+st.html(
+    """
+    <div style="color:#38BDF8; font-size:0.96rem; font-weight:850; line-height:1.45; margin:6px 0 14px 0;">
+        Choose a tradeoff to investigate → read the scatter pattern → compare family context and exceptions.
+    </div>
+    """
+)
+
 render_page_intro()
 
 
@@ -1089,6 +1283,8 @@ with main_col:
     # SECTION 01
     # =========================================================================
 
+    st.markdown('<a id="p2-tradeoff-select"></a>', unsafe_allow_html=True)
+
     render_section_title(
         number="01",
         title="Which structural question should we investigate?",
@@ -1098,21 +1294,24 @@ with main_col:
     def reset_p2_advanced_tradeoff():
         st.session_state["p2_advanced_tradeoff"] = "None — stay with curated question"
 
-    selected_tradeoff = st.radio(
-        "Curated investigation questions",
-        options=CURATED_TRADEOFF_NAMES,
-        horizontal=True,
-        index=0,
-        key="p2_selected_tradeoff",
-        on_change=reset_p2_advanced_tradeoff,
-    )
+    curated_col, advanced_col, current_col = st.columns([1.0, 1.0, 1.8], gap="medium")
 
-    advanced_tradeoff = st.selectbox(
-        "Explore another relationship",
-        options=["None — stay with curated question"] + ADVANCED_TRADEOFF_NAMES,
-        index=0,
-        key="p2_advanced_tradeoff",
-    )
+    with curated_col:
+        selected_tradeoff = st.selectbox(
+            "Curated tradeoff",
+            options=CURATED_TRADEOFF_NAMES,
+            index=0,
+            key="p2_selected_tradeoff",
+            on_change=reset_p2_advanced_tradeoff,
+        )
+
+    with advanced_col:
+        advanced_tradeoff = st.selectbox(
+            "Advanced relationship",
+            options=["None — stay with curated question"] + ADVANCED_TRADEOFF_NAMES,
+            index=0,
+            key="p2_advanced_tradeoff",
+        )
 
     active_tradeoff = (
         selected_tradeoff
@@ -1122,18 +1321,30 @@ with main_col:
 
     active_tradeoff_config = TRADEOFF_REGISTRY[active_tradeoff]
 
-    render_hero_card(
-        title="Current Investigation",
-        value=active_tradeoff,
-        delta_text=active_tradeoff_config["question"],
-        status="Observe the pattern first, then check families and exceptions.",
-    )
+    with current_col:
+        st.html(
+            f"""
+            <div style="
+                border:1px solid rgba(56,189,248,0.36);
+                border-radius:14px;
+                background:linear-gradient(135deg, rgba(30,58,95,0.72), rgba(15,23,42,0.78));
+                padding:10px 14px;
+                min-height:78px;
+            ">
+                <div style="color:#CBD5E1; font-size:0.70rem; font-weight:900; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:5px;">Current Investigation</div>
+                <div style="color:#F8FAFC; font-size:1.02rem; font-weight:900; font-family:'IBM Plex Mono','Roboto Mono',monospace; line-height:1.10; margin-bottom:5px;">{active_tradeoff}</div>
+                <div style="color:#E2E8F0; font-size:0.84rem; font-weight:700; line-height:1.25;">{active_tradeoff_config['question']}</div>
+            </div>
+            """
+        )
+
 
         # =========================================================================
     # SECTION 02
     # =========================================================================
 
     active_tradeoff_config = TRADEOFF_REGISTRY[active_tradeoff]
+
 
     render_section_title(
         number="02",
@@ -1251,7 +1462,7 @@ with main_col:
     evidence_label = evidence_labels.get(evidence_level, "Evidence Review")
     evidence_confidence = active_tradeoff_config["confidence"]
 
-    visual_col, insight_col = st.columns([2.35, 1], gap="medium")
+    visual_col, insight_col = st.columns([2.75, 1], gap="medium")
 
     with visual_col:
         st.html(
@@ -1274,6 +1485,7 @@ with main_col:
                 selected_country=selected_country,
                 tradeoff_config=active_tradeoff_config,
                 correlation=correlation,
+                reference_country=reference_country if selected_reference == "Another Country" else None,
             ),
             use_container_width=True,
         )
@@ -1293,6 +1505,7 @@ with main_col:
             accent="#C084FC",
         )
 
+
     with insight_col:
         render_pattern_summary_card(
             pattern_strength=pattern_strength,
@@ -1309,8 +1522,8 @@ with main_col:
                 border-left: 6px solid {evidence_color};
                 background: rgba(15, 23, 42, 0.82);
                 border-radius: 14px;
-                padding: 18px;
-                margin-bottom: 10px;
+                padding: 14px;
+                margin-bottom: 9px;
             ">
                 <div style="
                     color: #CBD5E1;
@@ -1325,7 +1538,7 @@ with main_col:
 
                 <div style="
                     color: {evidence_color};
-                    font-size: 2.1rem;
+                    font-size: 1.7rem;
                     font-weight: 900;
                     line-height: 1;
                     margin-bottom: 8px;
@@ -1354,15 +1567,23 @@ with main_col:
             """
         )
 
-        render_hero_card(
-            title=f"{selected_country} Position",
-            value=country_position_label,
-            delta_text=(
-                f"{active_tradeoff_config['x_label']}: {selected_x:.2f} | "
-                f"{active_tradeoff_config['y_label']}: {selected_y:.2f} | "
-                f"Deviation: {selected_deviation:+.2f}"
-            ),
-            status=f"{selected_family}. {country_position_status}",
+        st.html(
+            f"""
+            <div style="
+                border:1px solid rgba(56,189,248,0.38);
+                border-radius:14px;
+                padding:14px 15px;
+                background:linear-gradient(135deg, rgba(30,58,95,0.82), rgba(15,23,42,0.86));
+                margin-bottom:10px;
+            ">
+                <div style="color:#F8FAFC; font-size:0.82rem; font-weight:900; margin-bottom:7px;">{selected_country} Position</div>
+                <div style="color:#F8FAFC; font-size:1.18rem; font-weight:900; font-family:'IBM Plex Mono','Roboto Mono',monospace; margin-bottom:8px; line-height:1.18;">{country_position_label}</div>
+                <div style="color:#38BDF8; font-size:0.86rem; font-weight:850; line-height:1.32; margin-bottom:7px;">
+                    {active_tradeoff_config['x_label']}: {selected_x:.2f} | {active_tradeoff_config['y_label']}: {selected_y:.2f} | Deviation: {selected_deviation:+.2f}
+                </div>
+                <div style="color:#E2E8F0; font-size:0.83rem; font-weight:650; line-height:1.32;">{selected_family}. {country_position_status}</div>
+            </div>
+            """
         )
 
 
@@ -1537,7 +1758,7 @@ with main_col:
     )
 
     # =========================================================================
-    # P2 MVP INTERPRETATION + MISSION ENTRY
+    # P2 current version INTERPRETATION + MISSION ENTRY
     # =========================================================================
 
     top_positive_exception = (
@@ -1638,7 +1859,21 @@ with main_col:
         "next_step": "Build a Strategy",
     }
 
-    mission_log_df = pd.DataFrame([mission_entry])
+    add_journey_event(
+        page=mission_entry["page"],
+        action_type=mission_entry["action_type"],
+        country=mission_entry["country"],
+        topic=mission_entry["topic"],
+        observation=mission_entry["observation"],
+        evidence=mission_entry["evidence"],
+        confidence=mission_entry["confidence"],
+        family_context=mission_entry["family_context"],
+        exception=mission_entry["exception"],
+        next_step=mission_entry["next_step"],
+        dedupe_key=f"p2_observation::{selected_country}::{active_tradeoff}::{live_evidence_level}::{correlation:.3f}",
+    )
+
+    mission_log_df = get_journey_log_df()
 
     # =========================================================================
     # SECTION 05
@@ -1748,12 +1983,32 @@ with cta_try:
             """
         )
 
-        if st.button(
-            "Try Another Tradeoff",
-            key="p2_cta_try_again",
-            use_container_width=True,
-        ):
-            st.rerun()
+        st.markdown(
+            """
+            <a href="#p2-tradeoff-select" class="p2-inline-cta-button">Try Another Tradeoff</a>
+            <style>
+            .p2-inline-cta-button {
+                display:block;
+                width:100%;
+                text-align:center;
+                text-decoration:none !important;
+                background:linear-gradient(180deg, #38BDF8, #2563EB) !important;
+                color:#FFFFFF !important;
+                border:1px solid rgba(125,211,252,0.80) !important;
+                border-radius:12px !important;
+                font-weight:850 !important;
+                padding:0.75rem 1rem !important;
+                box-shadow:0 0 14px rgba(56,189,248,0.28), 0 0 24px rgba(37,99,235,0.20) !important;
+                line-height:1.15 !important;
+            }
+            .p2-inline-cta-button:hover {
+                background:linear-gradient(180deg, #67E8F9, #3B82F6) !important;
+                color:#FFFFFF !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
 
 # -------------------------------------------------------------------------
 # STRATEGIC CHOICES
@@ -1813,6 +2068,16 @@ with cta_next:
             key="p2_cta_strategic_choices",
             use_container_width=True,
         ):
+            sync_p2_to_atlas_state()
+            add_journey_event(
+                page="P2 Tradeoff Explorer",
+                action_type="open page",
+                country=selected_country,
+                topic="Continue to Strategic Choices",
+                observation=f"Opened P3 after investigating {active_tradeoff} for {selected_country}.",
+                next_step="Build a strategy",
+                dedupe_key=f"p2_to_p3::{selected_country}::{active_tradeoff}",
+            )
             safe_switch_page("pages/p3_strategic_choices.py")
 
 # -------------------------------------------------------------------------
@@ -1873,6 +2138,16 @@ with cta_country:
             key="p2_cta_country_explorer",
             use_container_width=True,
         ):
+            sync_p2_to_atlas_state()
+            add_journey_event(
+                page="P2 Tradeoff Explorer",
+                action_type="open page",
+                country=selected_country,
+                topic="Return to Country Explorer",
+                observation=f"Returned to P1 from {active_tradeoff} investigation.",
+                next_step="Review country/reference context",
+                dedupe_key=f"p2_to_p1::{selected_country}::{active_tradeoff}",
+            )
             safe_switch_page("pages/p1_country_explorer.py")
 
 # -------------------------------------------------------------------------
@@ -1933,9 +2208,74 @@ with cta_assume:
             key="p2_cta_assumptions",
             use_container_width=True,
         ):
+            add_journey_event(
+                page="P2 Tradeoff Explorer",
+                action_type="review assumptions",
+                country=selected_country,
+                topic=active_tradeoff,
+                observation="Opened the assumptions reminder for exploratory, non-causal interpretation.",
+                next_step="Continue with caution",
+                dedupe_key=f"p2_assumptions::{selected_country}::{active_tradeoff}",
+            )
             st.info(
                 "Assumptions page/link will be wired during global framework cleanup."
             )
+
+
+# =============================================================================
+# RIGHT MISSION BAR — PAGE CONTEXT
+# =============================================================================
+
+with right_col:
+    reference_label = (
+        f"Another Country: {reference_country}"
+        if selected_reference == "Another Country" and reference_country
+        else selected_reference
+    )
+
+    st.html(
+        f"""
+        <div style="
+            border:1px solid rgba(56,189,248,0.38);
+            border-radius:16px;
+            padding:14px 15px;
+            background:linear-gradient(145deg, rgba(15,23,42,0.96), rgba(15,23,42,0.78));
+            position: sticky;
+            top: 0.75rem;
+        ">
+            <div style="
+                color:#38BDF8;
+                font-size:0.76rem;
+                font-weight:900;
+                letter-spacing:0.10em;
+                text-transform:uppercase;
+                margin-bottom:12px;
+            ">Mission Log</div>
+
+            <div style="color:#F8FAFC; font-size:0.86rem; font-weight:900; margin-bottom:5px;">Current Mission</div>
+            <div style="color:#CBD5E1; font-size:0.82rem; line-height:1.35; margin-bottom:14px;">
+                Investigate how <b>{selected_country}</b> behaves in the selected tradeoff space.
+            </div>
+
+            <div style="color:#F8FAFC; font-size:0.86rem; font-weight:900; margin-bottom:5px;">Latest Learning</div>
+            <div style="color:#CBD5E1; font-size:0.82rem; line-height:1.35; margin-bottom:14px;">
+                {active_tradeoff}: {pattern_strength.lower()} {direction.lower()} pattern; evidence {evidence_level}.
+            </div>
+
+            <div style="color:#F8FAFC; font-size:0.86rem; font-weight:900; margin-bottom:5px;">Context</div>
+            <div style="color:#CBD5E1; font-size:0.82rem; line-height:1.35; margin-bottom:14px;">
+                Country: <b>{selected_country}</b><br>
+                Reference: <b>{reference_label}</b><br>
+                View: <b>{view_mode}</b>
+            </div>
+
+            <div style="color:#A3E635; font-size:0.86rem; font-weight:900; margin-bottom:5px;">Suggested Next Step</div>
+            <div style="color:#CBD5E1; font-size:0.82rem; line-height:1.35;">
+                Use the graph and questions to interpret the tradeoff, then move to Strategy Choices.
+            </div>
+        </div>
+        """
+    )
 
 # =============================================================================
 # FULL WIDTH JOURNEY LOG
