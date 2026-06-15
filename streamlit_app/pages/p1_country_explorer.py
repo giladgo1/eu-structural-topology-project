@@ -1504,19 +1504,7 @@ st.html(
 # =============================================================================
 # SNAPSHOT RIBBON
 # =============================================================================
-
-st.html(
-    """
-    <div class="p1-snapshot-ribbon">
-        <div class="p1-snapshot-title">COUNTRY SNAPSHOT</div>
-        <div class="p1-snapshot-card"><span>Population</span><strong>—</strong></div>
-        <div class="p1-snapshot-card"><span>GDP / capita</span><strong>—</strong></div>
-        <div class="p1-snapshot-card"><span>Debt</span><strong>—</strong></div>
-        <div class="p1-snapshot-card"><span>Median Age</span><strong>—</strong></div>
-        <div class="p1-snapshot-card"><span>EU Since</span><strong>—</strong></div>
-    </div>
-    """
-)
+# Hidden for graduation MVP: demographic/economic snapshot data is not included in the validated app dataset.
 
 
 # =============================================================================
