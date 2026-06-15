@@ -101,3 +101,25 @@ tmp/
 # ============================================================
 
 ._*
+# ============================================================
+# LOCAL SOURCE / WORKING MATERIALS — KEEP LOCAL, DO NOT PUBLISH
+# ============================================================
+
+docs/state/
+reports/dashboard_mockups/
+reports/project design/
+reports/project status standups/
+reports/proposal/
+
+# Backup / old development files
+streamlit_app/pages/backups/
+streamlit_app/styles/*backup*.css
+streamlit_app/utils/*Copy*.py
+streamlit_app/components/*Copy*.py
+
+# Local audit files
+repo_tree.txt
+repo_dirs.txt
+
+# Final presentation exports - local only for now
+reports/figures/final_presentation/
