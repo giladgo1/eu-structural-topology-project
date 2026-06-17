@@ -574,6 +574,24 @@ st.html(
         font-weight:800 !important;
     }
 
+    /* P4 FINAL LAYOUT RESTORE — compact results table + wider results column. */
+    .p4-results-table-wide {
+        font-size:0.78rem !important;
+    }
+    .p4-results-table-wide th {
+        font-size:0.60rem !important;
+        padding:6px 4px !important;
+    }
+    .p4-results-table-wide td {
+        padding:6px 4px !important;
+    }
+    .p4-name {
+        color:#F8FAFC !important;
+        font-size:0.80rem !important;
+        font-weight:950 !important;
+        line-height:1.15 !important;
+    }
+
 </style>
     """
 )
@@ -865,6 +883,65 @@ def get_reading(delta: float, output_name: str = "") -> str:
     return "Mostly stable"
 
 
+def get_state_color(value: float, baseline: float, output_name: str = "") -> str:
+    """Color a state relative to the previous state.
+
+    Visual grammar for P4 recovery table:
+    - Ref is neutral.
+    - After Shock is colored by damage vs Ref.
+    - Response Test is colored by recovery vs After Shock.
+
+    Fiscal Pressure is inverted: higher pressure is worse, lower pressure is better.
+    """
+    delta = float(value) - float(baseline)
+
+    if abs(delta) < 1:
+        return "#F8FAFC"
+
+    if output_name == "Fiscal Pressure":
+        return "#F472B6" if delta > 0 else "#4ADE80"
+
+    return "#4ADE80" if delta > 0 else "#F472B6"
+
+
+def get_recovery_reading(
+    ref_value: float,
+    shock_value: float,
+    response_value: float,
+    output_name: str = "",
+) -> tuple[str, str]:
+    """Return recovery reading and color based on Shock -> Response movement.
+
+    The reading is not a total evaluation of the country. It describes whether
+    the response improved the damaged state.
+    """
+    damage = float(shock_value) - float(ref_value)
+    recovery = float(response_value) - float(shock_value)
+
+    if output_name == "Fiscal Pressure":
+        # Fiscal Pressure is inverted: shock damage is pressure increase;
+        # recovery is pressure reduction.
+        damage_score = damage
+        recovery_score = -recovery
+    else:
+        damage_score = -damage
+        recovery_score = recovery
+
+    if abs(damage_score) < 1 and abs(recovery_score) < 1:
+        return "Mostly stable", "#38BDF8"
+
+    if recovery_score <= 0.5:
+        return "No recovery", "#94A3B8"
+
+    if recovery_score < 3:
+        return "Small recovery", "#38BDF8"
+
+    if recovery_score < 6:
+        return "Partial recovery", "#4ADE80"
+
+    return "Strong recovery", "#4ADE80"
+
+
 def classify_resilience(score: float) -> str:
     if score >= 70:
         return "Strong"
@@ -1126,38 +1203,96 @@ def render_recovery_dimension_table(shock_dimensions: dict[str, float], response
     )
 
 
-def render_recovery_output_table(current_outputs: dict[str, float], shock_outputs: dict[str, float], response_outputs: dict[str, float], recovery_name: str, recovery_delta: float, resilience_score: float, resilience_label: str, remaining_risk_name: str, remaining_risk_value: float):
+def render_recovery_output_table(
+    current_outputs: dict[str, float],
+    shock_outputs: dict[str, float],
+    response_outputs: dict[str, float],
+    recovery_name: str,
+    recovery_delta: float,
+    resilience_score: float,
+    resilience_label: str,
+    remaining_risk_name: str,
+    remaining_risk_value: float,
+):
+    """Render final recovery table with explicit state colors.
+
+    Meaning of colors:
+    - Ref: neutral baseline before shock.
+    - After Shock: colored by damage/improvement versus Ref.
+    - Response Test: colored by recovery/improvement versus After Shock.
+    - Δ Recovery: response movement from the shocked state.
+    """
     rows = []
+
     for output_name in OUTPUT_REGISTRY.keys():
         ref_value = current_outputs[output_name]
         shock_value = shock_outputs[output_name]
         response_value = response_outputs[output_name]
-        delta = response_value - shock_value
-        accent = get_delta_color(delta, output_name)
-        arrow = "▲" if delta > 1 else "▼" if delta < -1 else "→"
-        reading = get_reading(delta, output_name)
+
+        damage_delta_from_ref = shock_value - ref_value
+        recovery_delta_from_shock = response_value - shock_value
+
+        shock_color = get_state_color(
+            value=shock_value,
+            baseline=ref_value,
+            output_name=output_name,
+        )
+        response_color = get_state_color(
+            value=response_value,
+            baseline=shock_value,
+            output_name=output_name,
+        )
+        damage_color = get_delta_color(damage_delta_from_ref, output_name)
+        recovery_color_row = get_delta_color(recovery_delta_from_shock, output_name)
+
+        damage_arrow = (
+            "▲" if damage_delta_from_ref > 1
+            else "▼" if damage_delta_from_ref < -1
+            else "→"
+        )
+        recovery_arrow = (
+            "▲" if recovery_delta_from_shock > 1
+            else "▼" if recovery_delta_from_shock < -1
+            else "→"
+        )
+
+        reading, reading_color = get_recovery_reading(
+            ref_value=ref_value,
+            shock_value=shock_value,
+            response_value=response_value,
+            output_name=output_name,
+        )
+
         rows.append(
             f"""
             <tr>
                 <td><span class="p4-name">{output_name}</span></td>
                 <td><span class="p4-score">{ref_value:.0f}</span></td>
-                <td><span class="p4-score">{shock_value:.0f}</span></td>
-                <td><span class="p4-score">{response_value:.0f}</span></td>
-                <td><span class="p4-delta" style="color:{accent};">{arrow} {delta:+.1f}</span></td>
-                <td><span class="p4-reading" style="color:{accent};">{reading}</span></td>
+                <td><span class="p4-score" style="color:{shock_color};">{shock_value:.0f}</span></td>
+                <td><span class="p4-delta" style="color:{damage_color};">{damage_arrow} {damage_delta_from_ref:+.1f}</span></td>
+                <td><span class="p4-score" style="color:{response_color};">{response_value:.0f}</span></td>
+                <td><span class="p4-delta" style="color:{recovery_color_row};">{recovery_arrow} {recovery_delta_from_shock:+.1f}</span></td>
+                <td><span class="p4-reading" style="color:{reading_color};">{reading}</span></td>
             </tr>
             """
         )
 
     recovery_color = get_delta_color(recovery_delta, recovery_name)
-    resilience_color = "#4ADE80" if resilience_score >= 70 else "#FBBF24" if resilience_score >= 55 else "#F97316" if resilience_score >= 40 else "#F472B6"
+    resilience_color = (
+        "#4ADE80" if resilience_score >= 70
+        else "#FBBF24" if resilience_score >= 55
+        else "#F97316" if resilience_score >= 40
+        else "#F472B6"
+    )
 
     st.html(
         f"""
         <div class="p4-table-card">
             <div class="p4-table-title">Recovery Test Results</div>
             <div class="p4-table-subtitle">
-                <b>Ref</b> = selected strategy before shock · <b>Shock</b> = disrupted state · <b>Response Test</b> = last executed recovery response.
+                <b>REF</b> = before shock · <b>SHOCK</b> = damaged state ·
+                <b>DAMAGE</b> = Shock minus Ref · <b>TEST</b> = response result ·
+                <b>RECOVERY</b> = Test minus Shock.
             </div>
             <div class="p4-mini-summary-grid">
                 <div class="p4-mini-summary-card">
@@ -1178,14 +1313,25 @@ def render_recovery_output_table(current_outputs: dict[str, float], shock_output
             </div>
             <table class="p4-table p4-results-table-wide">
                 <colgroup>
-                    <col style="width:26%;">
-                    <col style="width:11%;">
-                    <col style="width:11%;">
-                    <col style="width:16%;">
-                    <col style="width:14%;">
-                    <col style="width:22%;">
+                    <col style="width:28%;">
+                    <col style="width:8%;">
+                    <col style="width:9%;">
+                    <col style="width:13%;">
+                    <col style="width:9%;">
+                    <col style="width:13%;">
+                    <col style="width:20%;">
                 </colgroup>
-                <thead><tr><th>Output</th><th>Ref</th><th>Shock</th><th>Response Test</th><th>Δ</th><th>Reading</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Output</th>
+                        <th>REF</th>
+                        <th>SHOCK</th>
+                        <th>DAMAGE</th>
+                        <th>TEST</th>
+                        <th>RECOVERY</th>
+                        <th>READING</th>
+                    </tr>
+                </thead>
                 <tbody>{''.join(rows)}</tbody>
             </table>
         </div>
@@ -1669,7 +1815,7 @@ with main_col:
         """
     )
 
-    choose_col, scenario_col, damage_col = st.columns([1.25, 1.45, 3.40], gap="medium")
+    choose_col, scenario_col, damage_col = st.columns([1.05, 1.25, 4.20], gap="medium")
 
     with choose_col:
         st.markdown("### 1 · Choose Challenge")
@@ -1717,7 +1863,7 @@ with main_col:
             reset_response()
             st.rerun()
 
-        render_coming_soon_panel()
+        #render_coming_soon_panel()
 
     with scenario_col:
         st.markdown("### 2 · Scenario & Apply")
@@ -1840,7 +1986,7 @@ with main_col:
 
     render_response_package_card(draft_response, title="Current Response Package")
 
-    response_col, recovery_run_col, results_col = st.columns([2.75, 0.85, 2.10], gap="medium")
+    response_col, recovery_run_col, results_col = st.columns([2.40, 0.70, 2.90], gap="medium")
 
     with response_col:
         st.markdown("### 1 · Build Response")
@@ -1942,7 +2088,7 @@ with main_col:
         st.markdown("### 3 · Observe Recovery")
         if not st.session_state["p4_has_response_run"]:
             st.markdown(
-                "<div class='p4-section-hint'>No recovery test has been run yet. The table shows Shock = Response until you run recovery.</div>",
+                "<div class='p4-section-hint'>No recovery test has been run yet. After Shock and Response Test are identical until you run recovery.</div>",
                 unsafe_allow_html=True,
             )
         else:

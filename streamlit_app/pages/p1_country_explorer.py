@@ -679,8 +679,8 @@ def create_p1_reference_radar_chart(
         margin=dict(
             l=38,
             r=38,
-            t=90,
-            b=34,
+            t=74,
+            b=56,
         ),
         polar=dict(
             bgcolor="rgba(0,0,0,0)",
@@ -1050,7 +1050,7 @@ def create_investment_profile_chart(country_year_df: pd.DataFrame, selected_coun
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.03,
+            y=1.02,
             xanchor="left",
             x=0,
             font=dict(size=13, color="#E5E7EB"),
